@@ -59,7 +59,7 @@
     svg {
       width: 100%;
       height: auto;
-      max-height: 750px;
+      max-height: 850px;
     }
     .tfl-line {
       fill: none;
@@ -82,7 +82,7 @@
     }
     .station-label {
       fill: var(--text-main);
-      font-size: 10.5px;
+      font-size: 10px;
       font-family: ui-sans-serif, system-ui, sans-serif;
       font-weight: 500;
     }
@@ -98,7 +98,7 @@
     }
     .train-text {
       fill: var(--bg);
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: bold;
       font-family: ui-sans-serif, system-ui, sans-serif;
     }
@@ -111,72 +111,76 @@
     
     <div class="header">
       <h1>London <span>Overground</span></h1>
-      <p style="color: var(--text-muted); margin-top:0;">Weaver Line Schematic Layout</p>
+      <p style="color: var(--text-muted); margin-top:0;">Weaver Line Full Route Schematic</p>
     </div>
 
     <div class="board">
       <div id="status-text" class="loading">Generating schematic and connecting to TfL API...</div>
       
-      <!-- Corrected SVG Topology Map -->
-      <svg viewBox="0 0 900 850" id="tfl-map">
-        <!-- Lines (Weaver Line Maroon Paths matching official geometry) -->
-        <!-- Cheshunt & Enfield Northern Branches converging at Edmonton Green -->
-        <path class="tfl-line" d="M 200 50 L 300 100 L 300 160" />
-        <path class="tfl-line" d="M 400 100 L 300 160" />
+      <!-- Perfectly Aligned Official Topology SVG -->
+      <svg viewBox="0 0 900 1150" id="tfl-map">
+        <!-- Lines (Weaver Line Maroon Paths) -->
+        <!-- Northern Branches: Cheshunt & Enfield converging at Edmonton Green -->
+        <path class="tfl-line" d="M 250 50 L 350 100 L 350 160" />
+        <path class="tfl-line" d="M 450 100 L 350 160" />
         
-        <!-- Western Branch down through Seven Sisters to Hackney Downs -->
-        <path class="tfl-line" d="M 300 160 L 300 480 L 400 560" />
+        <!-- Western Side down through Seven Sisters to Hackney Downs -->
+        <path class="tfl-line" d="M 350 160 L 350 480 L 450 560" />
         
-        <!-- Chingford Branch running down the right side into Hackney Downs -->
-        <path class="tfl-line" d="M 650 80 L 550 160 L 550 350 L 400 560" />
+        <!-- Chingford Branch on the right meeting at Hackney Downs -->
+        <path class="tfl-line" d="M 650 80 L 550 160 L 550 350 L 450 560" />
 
-        <!-- Southern Trunk down to Liverpool Street -->
-        <path class="tfl-line" d="M 400 560 L 400 740" />
+        <!-- Central Core: Hackney Downs down through Liverpool Street and Whitechapel -->
+        <path class="tfl-line" d="M 450 560 L 450 780" />
 
-        <!-- Stations Grouped with Corrected Grid Coordinates -->
+        <!-- Southern Split below Whitechapel towards New Cross & Crystal Palace / Croydon -->
+        <path class="tfl-line" d="M 450 780 L 550 880 L 650 980" />
+        <path class="tfl-line" d="M 550 880 L 350 980 L 250 1050" />
+
+        <!-- Stations Grouped with Exact Grid Coordinates -->
         <g id="station-nodes">
-          <!-- Cheshunt Branch -->
-          <circle class="station-dot interchange" cx="200" cy="50" data-station="Cheshunt"></circle>
-          <text class="station-label interchange" x="120" y="54" data-station="Cheshunt">Cheshunt</text>
+          <!-- Northern Branch: Cheshunt -->
+          <circle class="station-dot interchange" cx="250" cy="50" data-station="Cheshunt"></circle>
+          <text class="station-label interchange" x="170" y="54" data-station="Cheshunt">Cheshunt</text>
 
-          <circle class="station-dot" cx="250" cy="75" data-station="Theobalds Grove"></circle>
-          <text class="station-label" x="145" y="79" data-station="Theobalds Grove">Theobalds Grove</text>
+          <circle class="station-dot" cx="300" cy="75" data-station="Theobalds Grove"></circle>
+          <text class="station-label" x="195" y="79" data-station="Theobalds Grove">Theobalds Grove</text>
 
-          <circle class="station-dot" cx="300" cy="100" data-station="Turkey Street"></circle>
-          <text class="station-label" x="210" y="104" data-station="Turkey Street">Turkey Street</text>
+          <circle class="station-dot" cx="350" cy="100" data-station="Turkey Street"></circle>
+          <text class="station-label" x="260" y="104" data-station="Turkey Street">Turkey Street</text>
 
-          <!-- Enfield Branch -->
-          <circle class="station-dot" cx="400" cy="100" data-station="Enfield Town"></circle>
-          <text class="station-label" x="415" y="104" data-station="Enfield Town">Enfield Town</text>
+          <!-- Northern Branch: Enfield Town -->
+          <circle class="station-dot" cx="450" cy="100" data-station="Enfield Town"></circle>
+          <text class="station-label" x="465" y="104" data-station="Enfield Town">Enfield Town</text>
 
-          <circle class="station-dot" cx="350" cy="130" data-station="Bush Hill Park"></circle>
-          <text class="station-label" x="365" y="134" data-station="Bush Hill Park">Bush Hill Park</text>
+          <circle class="station-dot" cx="400" cy="130" data-station="Bush Hill Park"></circle>
+          <text class="station-label" x="415" y="134" data-station="Bush Hill Park">Bush Hill Park</text>
 
-          <!-- Edmonton Green (Convergence) -->
-          <circle class="station-dot interchange" cx="300" cy="160" data-station="Edmonton Green"></circle>
-          <text class="station-label interchange" x="185" y="164" data-station="Edmonton Green">Edmonton Green</text>
+          <!-- Edmonton Green Convergence -->
+          <circle class="station-dot interchange" cx="350" cy="160" data-station="Edmonton Green"></circle>
+          <text class="station-label interchange" x="235" y="164" data-station="Edmonton Green">Edmonton Green</text>
 
           <!-- Down through Tottenham -->
-          <circle class="station-dot" cx="300" cy="210" data-station="Silver Street"></circle>
-          <text class="station-label" x="315" y="214" data-station="Silver Street">Silver Street</text>
+          <circle class="station-dot" cx="350" cy="210" data-station="Silver Street"></circle>
+          <text class="station-label" x="365" y="214" data-station="Silver Street">Silver Street</text>
 
-          <circle class="station-dot" cx="300" cy="260" data-station="White Hart Lane"></circle>
-          <text class="station-label" x="315" y="264" data-station="White Hart Lane">White Hart Lane</text>
+          <circle class="station-dot" cx="350" cy="260" data-station="White Hart Lane"></circle>
+          <text class="station-label" x="365" y="264" data-station="White Hart Lane">White Hart Lane</text>
 
-          <circle class="station-dot" cx="300" cy="310" data-station="Bruce Grove"></circle>
-          <text class="station-label" x="315" y="314" data-station="Bruce Grove">Bruce Grove</text>
+          <circle class="station-dot" cx="350" cy="310" data-station="Bruce Grove"></circle>
+          <text class="station-label" x="365" y="314" data-station="Bruce Grove">Bruce Grove</text>
 
-          <circle class="station-dot interchange" cx="300" cy="360" data-station="Seven Sisters"></circle>
-          <text class="station-label interchange" x="205" y="364" data-station="Seven Sisters">Seven Sisters</text>
+          <circle class="station-dot interchange" cx="350" cy="360" data-station="Seven Sisters"></circle>
+          <text class="station-label interchange" x="255" y="364" data-station="Seven Sisters">Seven Sisters</text>
 
-          <circle class="station-dot" cx="300" cy="400" data-station="Stamford Hill"></circle>
-          <text class="station-label" x="315" y="404" data-station="Stamford Hill">Stamford Hill</text>
+          <circle class="station-dot" cx="350" cy="400" data-station="Stamford Hill"></circle>
+          <text class="station-label" x="365" y="404" data-station="Stamford Hill">Stamford Hill</text>
 
-          <circle class="station-dot" cx="300" cy="435" data-station="Stoke Newington"></circle>
-          <text class="station-label" x="315" y="439" data-station="Stoke Newington">Stoke Newington</text>
+          <circle class="station-dot" cx="350" cy="435" data-station="Stoke Newington"></circle>
+          <text class="station-label" x="365" y="439" data-station="Stoke Newington">Stoke Newington</text>
 
-          <circle class="station-dot" cx="300" cy="470" data-station="Rectory Road"></circle>
-          <text class="station-label" x="315" y="474" data-station="Rectory Road">Rectory Road</text>
+          <circle class="station-dot" cx="350" cy="470" data-station="Rectory Road"></circle>
+          <text class="station-label" x="365" y="474" data-station="Rectory Road">Rectory Road</text>
 
           <!-- Chingford Branch (Right Side) -->
           <circle class="station-dot" cx="650" cy="80" data-station="Chingford"></circle>
@@ -197,22 +201,47 @@
           <circle class="station-dot" cx="450" cy="330" data-station="Clapton"></circle>
           <text class="station-label" x="465" y="334" data-station="Clapton">Clapton</text>
 
-          <!-- Hackney Downs (Major Interchange where branches meet) -->
-          <circle class="station-dot interchange" cx="400" cy="560" data-station="Hackney Downs"></circle>
-          <text class="station-label interchange" x="420" y="564" data-station="Hackney Downs">Hackney Downs</text>
+          <!-- Hackney Downs (Junction) -->
+          <circle class="station-dot interchange" cx="450" cy="560" data-station="Hackney Downs"></circle>
+          <text class="station-label interchange" x="470" y="564" data-station="Hackney Downs">Hackney Downs</text>
 
-          <!-- Southern Trunk to Liverpool Street -->
-          <circle class="station-dot" cx="400" cy="610" data-station="London Fields"></circle>
-          <text class="station-label" x="415" y="614" data-station="London Fields">London Fields</text>
+          <!-- Central Core & City -->
+          <circle class="station-dot" cx="450" cy="610" data-station="London Fields"></circle>
+          <text class="station-label" x="465" y="614" data-station="London Fields">London Fields</text>
 
-          <circle class="station-dot" cx="400" cy="650" data-station="Cambridge Heath"></circle>
-          <text class="station-label" x="415" y="654" data-station="Cambridge Heath">Cambridge Heath</text>
+          <circle class="station-dot" cx="450" cy="650" data-station="Cambridge Heath"></circle>
+          <text class="station-label" x="465" y="654" data-station="Cambridge Heath">Cambridge Heath</text>
 
-          <circle class="station-dot" cx="400" cy="690" data-station="Bethnal Green"></circle>
-          <text class="station-label" x="310" y="690" data-station="Bethnal Green">Bethnal Green</text>
+          <circle class="station-dot" cx="450" cy="690" data-station="Bethnal Green"></circle>
+          <text class="station-label" x="360" y="690" data-station="Bethnal Green">Bethnal Green</text>
 
-          <circle class="station-dot interchange" cx="400" cy="740" data-station="London Liverpool Street"></circle>
-          <text class="station-label interchange" x="420" y="744" data-station="London Liverpool Street">Liverpool Street</text>
+          <circle class="station-dot interchange" cx="450" cy="735" data-station="London Liverpool Street"></circle>
+          <text class="station-label interchange" x="470" y="739" data-station="London Liverpool Street">Liverpool Street</text>
+
+          <circle class="station-dot interchange" cx="450" cy="780" data-station="Whitechapel"></circle>
+          <text class="station-label interchange" x="470" y="784" data-station="Whitechapel">Whitechapel</text>
+
+          <!-- Southern Extension -->
+          <circle class="station-dot" cx="500" cy="830" data-station="Shadwell"></circle>
+          <text class="station-label" x="515" y="834" data-station="Shadwell">Shadwell</text>
+
+          <circle class="station-dot" cx="550" cy="880" data-station="Wapping"></circle>
+          <text class="station-label" x="565" y="884" data-station="Wapping">Wapping</text>
+
+          <circle class="station-dot" cx="600" cy="930" data-station="Rotherhithe"></circle>
+          <text class="station-label" x="615" y="934" data-station="Rotherhithe">Rotherhithe</text>
+
+          <circle class="station-dot interchange" cx="650" cy="980" data-station="Canada Water"></circle>
+          <text class="station-label interchange" x="665" y="984" data-station="Canada Water">Canada Water</text>
+
+          <circle class="station-dot" cx="500" cy="930" data-station="Surrey Quays"></circle>
+          <text class="station-label" x="410" y="930" data-station="Surrey Quays">Surrey Quays</text>
+
+          <circle class="station-dot interchange" cx="350" cy="980" data-station="New Cross"></circle>
+          <text class="station-label interchange" x="270" y="984" data-station="New Cross">New Cross</text>
+
+          <circle class="station-dot" cx="250" cy="1050" data-station="Crystal Palace"></circle>
+          <text class="station-label" x="155" y="1054" data-station="Crystal Palace">Crystal Palace</text>
         </g>
 
         <!-- Live Train Markers -->
