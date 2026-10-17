@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>Live Radio | Hawkes House</title>
   
   <!-- This script teaches your browser how to play modern BBC HLS streams -->
@@ -92,10 +93,18 @@
     </div>
 
     <div class="station">
-      <h3>Greatest Hits Radio</h3>
-      <!-- Using Bauer's newer AAC edge server -->
+      <h3>Classic FM</h3>
       <audio controls preload="none">
-        <source src="https://radio-proxy.alfie-hawkes2006.workers.dev/?station=greatest" type="audio/aac">
+        <!-- Direct secure stream from Global Radio -->
+        <source src="https://media-ssl.musicradio.com/ClassicFM" type="audio/mpeg">
+      </audio>
+    </div>
+
+    <div class="station">
+      <h3>University Radio Nottingham (URN)</h3>
+      <audio controls preload="none">
+        <!-- Direct secure stream from URN -->
+        <source src="https://live.urn1350.net/listen" type="audio/mpeg">
       </audio>
     </div>
 
@@ -108,7 +117,7 @@
     </div>
   </div>
 
-<!-- This script block connects the official BBC Akamai HLS streams to your audio players -->
+  <!-- This script block connects the official BBC Akamai HLS streams to your audio players -->
   <script>
     function setupHlsStream(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
@@ -121,7 +130,8 @@
         audio.src = streamUrl;
       }
     }
-// Official Akamai HLS streams updated to UK-only to bypass sports blackouts
+
+    // Official Akamai HLS streams updated to UK-only to bypass sports blackouts
     setupHlsStream('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     setupHlsStream('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
   </script>
