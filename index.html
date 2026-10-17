@@ -3,114 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hawkes House Dashboard</title>
+  <title>Hawkes House | Infrastructure</title>
   <style>
     :root {
-      --text-muted: #a0a0a0;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
     }
     body {
-      font-family: sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      padding: 20px;
-      max-width: 600px;
-      margin: 0 auto;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .dashboard {
+      max-width: 800px;
+      width: 100%;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      letter-spacing: -0.025em;
+    }
+    .header h1 span { color: var(--accent); }
+    .header p { color: var(--text-muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
     }
     .card {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 15px;
-      transition: background-color 0.2s;
+      background-color: var(--card-bg);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, border-color 0.2s;
     }
-    a.card-link .card:hover {
-      background-color: #2a2a2a;
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
     }
     .card h2 {
+      font-size: 1rem;
       margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 1.2rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
     }
     .status-indicator {
       display: flex;
       align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      font-weight: 500;
       font-size: 0.9rem;
     }
     .dot {
       width: 10px;
       height: 10px;
+      background-color: var(--success);
       border-radius: 50%;
-      background-color: #4CAF50; 
-      margin-right: 8px;
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
     }
     .dot.offline {
-      background-color: #f44336; 
+      background-color: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+      animation: none;
     }
-    .dot.neutral {
-      background-color: var(--text-muted); 
-    }
-    .card-link {
-      text-decoration: none;
-      color: inherit;
-      display: block; 
-    }
-    .radio-button {
-      display: inline-block;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #333;
-      color: white;
-      border: 1px solid #555;
-      border-radius: 5px;
-      text-decoration: none;
-      transition: background-color 0.2s;
-    }
-    .radio-button:hover {
-      background-color: #444;
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
   </style>
 </head>
 <body>
-
-  <div class="card">
-    <h2>Home Assistant</h2>
-    <div class="status-indicator">
-      <div class="dot offline"></div> Awaiting Hardware
+  <div class="dashboard">
+    <div class="header">
+      <h1>Hawkes<span>House</span></h1>
+      <p>Infrastructure & Media Gateway</p>
     </div>
-  </div>
-
-  <div class="card">
-    <h2>Public DNS</h2>
-    <div class="status-indicator">
-      <div class="dot"></div> Online & Secured
-    </div>
-  </div>
-
-  <a href="media.html" class="card-link">
-    <div class="card">
-      <h2>Media Archive</h2>
-      <div class="status-indicator" style="color: var(--text-muted);">
-        <div class="dot neutral"></div> View CD Catalog
+    <div class="grid">
+      
+      <div class="card">
+        <h2>Network (UniFi)</h2>
+        <div class="status-indicator">
+          <div class="dot offline"></div> Awaiting Hardware
+        </div>
       </div>
-    </div>
-  </a>
-
-  <a href="portfolio.html" class="card-link">
-    <div class="card">
-      <h2>Academic Portfolio</h2>
-      <div class="status-indicator" style="color: var(--text-muted);">
-        <div class="dot neutral"></div> View Mathematics
+      <a href="media.html" style="text-decoration: none; color: inherit;">
+        <div class="card">
+          <h2>Media Archive</h2>
+          <div class="status-indicator" style="color: var(--text-muted);">
+            <div class="dot"></div> View CD Catalog
+          </div>
+        </div>
+      </a>
+      <div class="card">
+        <h2>Home Assistant</h2>
+        <div class="status-indicator">
+          <div class="dot offline"></div> Awaiting Hardware
+        </div>
       </div>
+      <div class="card">
+        <h2>Public DNS</h2>
+        <div class="status-indicator">
+          <div class="dot"></div> Online & Secured
+        </div>
+      </div>
+      <a href="portfolio.html" style="text-decoration: none; color: inherit;">
+        <div class="card">
+          <h2>Academic Portfolio</h2>
+          <div class="status-indicator" style="color: var(--text-muted);">
+            <div class="dot"></div> View Mathematics
+          </div>
+        </div>
+      </a>
     </div>
-  </a>
-
-  <div style="margin-top: 5px;">
-    <a href="radio.html" class="radio-button">Live Radio Streams</a>
   </div>
-
+  
+  <!-- Replace YOUR_UNIQUE_STRING with your actual Cloudflare token -->
   <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
-
 </body>
 </html>
