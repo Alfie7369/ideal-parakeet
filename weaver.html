@@ -144,7 +144,7 @@
   </div>
 
   <script>
-    // The sequence of stations for the Enfield Town branch
+   // The sequence of stations for the Enfield Town branch
     const stations = [
       { name: "Enfield Town", interchange: false },
       { name: "Bush Hill Park", interchange: false },
@@ -169,7 +169,6 @@
     stations.forEach((station, index) => {
       const node = document.createElement('div');
       node.className = `station-node ${station.interchange ? 'interchange' : ''}`;
-      // Add a data attribute so we can find its Y-position later
       node.dataset.stationName = station.name;
       
       const label = document.createElement('div');
@@ -180,48 +179,61 @@
       mapContainer.appendChild(node);
     });
 
-    // 2. Fetch live data and plot trains
+    // 2. Fetch live data and plot actual physical trains
     async function fetchLiveTrains() {
       try {
-        // Query the TfL unified API for all live arrivals on the Weaver line
         const response = await fetch('https://api.tfl.gov.uk/Line/weaver/Arrivals');
         const data = await response.json();
         
-        // Clear old trains from the map
         document.querySelectorAll('.train-badge').forEach(badge => badge.remove());
 
-        let mappedTrains = 0;
+        // Group the API data by the physical train (vehicleId)
+        const trainsByVehicle = {};
 
-        // Loop through the live API data
-        data.forEach(train => {
-          // Clean up the station name from the API (e.g., removes "Rail Station") to match our list
-          const cleanStationName = train.stationName.replace(' Rail Station', '').replace(' (London)', '');
+        data.forEach(arrival => {
+          const cleanStationName = arrival.stationName.replace(' Rail Station', '').replace(' (London)', '');
           
-          // Find the corresponding HTML element on our schematic
-          const stationElement = document.querySelector(`[data-station-name="${cleanStationName}"]`);
+          // Find the absolute nearest station for this specific physical train
+          if (!trainsByVehicle[arrival.vehicleId] || arrival.timeToStation < trainsByVehicle[arrival.vehicleId].timeToStation) {
+            trainsByVehicle[arrival.vehicleId] = {
+              station: cleanStationName,
+              timeToStation: arrival.timeToStation,
+              direction: arrival.direction
+            };
+          }
+        });
+
+        let mappedTrains = 0;
+        const stationBadgeCounts = {};
+
+        // Loop through our isolated physical trains and plot them
+        Object.values(trainsByVehicle).forEach(train => {
+          const stationElement = document.querySelector(`[data-station-name="${train.station}"]`);
           
           if (stationElement) {
-            // Calculate where this train should float on the vertical timeline
-            const topPosition = stationElement.offsetTop;
+            // Track how many badges are at this station so they don't overlap
+            stationBadgeCounts[train.station] = (stationBadgeCounts[train.station] || 0) + 1;
+            const offsetMultiplier = stationBadgeCounts[train.station] - 1;
             
+            const topPosition = stationElement.offsetTop;
             const badge = document.createElement('div');
-            // Determine direction to add the correct arrow
+            
             const directionClass = train.direction === 'inbound' ? 'southbound' : 'northbound';
             badge.className = `train-badge ${directionClass}`;
             
-            // Convert timeToStation (seconds) into minutes
             const mins = Math.round(train.timeToStation / 60);
             badge.textContent = mins === 0 ? 'Due' : `${mins} min`;
             
-            // Vertically position the badge next to the station node
-            badge.style.top = `${topPosition + 22}px`; // +22px aligns it to the vertical center of the 45px row
+            // Shift the badge further left if another train is already plotted here
+            badge.style.left = `-${110 + (offsetMultiplier * 75)}px`;
+            badge.style.top = `${topPosition + 22}px`; 
             
             mapContainer.appendChild(badge);
             mappedTrains++;
           }
         });
 
-        document.getElementById('status-text').textContent = `Live Tracking Active: ${mappedTrains} trains plotted.`;
+        document.getElementById('status-text').textContent = `Live Tracking Active: ${mappedTrains} physical trains on route.`;
         document.getElementById('status-text').style.color = 'var(--text-muted)';
 
       } catch (error) {
@@ -231,7 +243,6 @@
       }
     }
 
-    // Load instantly, then poll every 30 seconds
     fetchLiveTrains();
     setInterval(fetchLiveTrains, 30000);
   </script>
