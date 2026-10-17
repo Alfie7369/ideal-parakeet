@@ -108,7 +108,7 @@
     </div>
   </div>
 
-  <!-- This script block connects the new BBC HLS streams to your audio players -->
+<!-- This script block connects the official BBC Akamai HLS streams to your audio players -->
   <script>
     function setupHlsStream(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
@@ -122,8 +122,9 @@
       }
     }
 
-    setupHlsStream('audio-nottingham', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_nottingham');
-    setupHlsStream('audio-leicester', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leicester');
+    // Official Akamai HLS streams from the Gist (upgraded to HTTPS)
+    setupHlsStream('audio-nottingham', 'https://as-hls-ww-live.akamaized.net/pool_96088503/live/ww/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
+    setupHlsStream('audio-leicester', 'https://as-hls-ww-live.akamaized.net/pool_04542919/live/ww/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
   </script>
 
 </body>
