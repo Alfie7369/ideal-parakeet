@@ -220,98 +220,56 @@
   </div>
 
   <script>
-    function calculateHFBands(kpIndex) {
-      const hour = new Date().getHours();
-      const isDay = hour >= 7 && hour < 19;
-
-      document.getElementById('local-time-indicator').textContent = isDay ? 'Daytime Propagation' : 'Nighttime Propagation';
-
-      const bands = [
-        { name: "80m (3.5 MHz)", dayBase: "Poor", nightBase: "Good" },
-        { name: "40m (7 MHz)",   dayBase: "Fair", nightBase: "Good" },
-        { name: "30m (10 MHz)",  dayBase: "Good", nightBase: "Fair" },
-        { name: "20m (14 MHz)",  dayBase: "Good", nightBase: "Fair" },
-        { name: "15m (21 MHz)",  dayBase: "Good", nightBase: "Poor" },
-        { name: "10m (28 MHz)",  dayBase: "Fair", nightBase: "Poor" }
-      ];
-
-      const hfContainer = document.getElementById('hf-bands');
-      hfContainer.innerHTML = '';
-
-      bands.forEach(band => {
-        let status = isDay ? band.dayBase : band.nightBase;
-
-        if (kpIndex >= 4) {
-          if (status === "Good") status = "Fair";
-          else if (status === "Fair") status = "Poor";
-        }
-        if (kpIndex >= 6) {
-          status = "Poor";
-        }
-
-        let statusClass = "status-poor";
-        if (status === "Good") statusClass = "status-good";
-        if (status === "Fair") statusClass = "status-fair";
-
-        const row = document.createElement('div');
-        row.className = 'band-row';
-        row.innerHTML = `
-          <div class="band-name">${band.name}</div>
-          <div class="${statusClass}">[ ${status.toUpperCase()} ]</div>
-        `;
-        hfContainer.appendChild(row);
-      });
-    }
-
-    async function fetchSpaceWeather() {
-      try {
-        const response = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
-        const data = await response.json();
-
-        // Filter out the header row and any empty trailing rows
-        const validData = data.filter((row, index) => index > 0 && row.length > 1 && !isNaN(parseFloat(row[1])));
-        const latestData = validData[validData.length - 1];
-        
-        const kpIndex = parseFloat(latestData[1]);
-        
-        // Convert NOAA's "YYYY-MM-DD HH:MM:SS" to strict ISO "YYYY-MM-DDTHH:MM:SSZ"
-        const timeString = latestData[0].replace(' ', 'T');
-        const timestamp = new Date(timeString + "Z");
-
-        let stormLevel = "QUIET";
-        let stormClass = "status-good";
-
-        if (kpIndex >= 4 && kpIndex < 5) {
-          stormLevel = "UNSETTLED";
-          stormClass = "status-fair";
-        } else if (kpIndex >= 5) {
-          stormLevel = "STORM (G" + (Math.floor(kpIndex) - 4) + ")";
-          stormClass = "status-poor";
-        }
-
-        document.getElementById('swpc-data').innerHTML = `
-          <div class="metric-row">
-            <div class="metric-label">Planetary K-Index</div>
-            <div class="metric-value ${stormClass}">Kp ${kpIndex.toFixed(2)}</div>
-          </div>
-          <div class="metric-row" style="margin-top: 1.5rem;">
-            <div class="metric-label">Geomagnetic Field</div>
-            <div class="metric-value ${stormClass}" style="font-size: 1.8rem;">${stormLevel}</div>
-          </div>
-        `;
-
-        document.getElementById('swpc-time').textContent = `Last NOAA update: ${timestamp.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
-
-        calculateHFBands(kpIndex);
-
-      } catch (error) {
-        console.error("Failed to load SWPC data:", error);
-        document.getElementById('swpc-data').innerHTML = '<div class="loading status-poor">NOAA FEED OFFLINE</div>';
+    // Setup HLS Streams for BBC
+    function initHls(elementId, streamUrl) {
+      const audio = document.getElementById(elementId);
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(audio);
+      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        audio.src = streamUrl;
       }
     }
 
-    fetchSpaceWeather();
-    setInterval(fetchSpaceWeather, 900000); 
+    initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
+    initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
+
+    // Custom Play/Pause Handler
+    function togglePlay(audioId, btn) {
+      const audio = document.getElementById(audioId);
+      const playIcon = btn.querySelector('.icon-play');
+      const pauseIcon = btn.querySelector('.icon-pause');
+
+      // Stop all other streams when playing a new one
+      document.querySelectorAll('audio').forEach(a => {
+        if (a.id !== audioId && !a.paused) {
+          a.pause();
+          const otherBtn = a.parentElement.querySelector('.play-btn');
+          if (otherBtn) {
+            otherBtn.querySelector('.icon-play').style.display = 'block';
+            otherBtn.querySelector('.icon-pause').style.display = 'none';
+          }
+        }
+      });
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+        }).catch(err => console.log("Playback error:", err));
+      } else {
+        audio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+      }
+
+      // Reset button if stream ends or stops
+      audio.onended = () => {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+      };
+    }
   </script>
 
 </body>
