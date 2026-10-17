@@ -223,13 +223,13 @@
         const response = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
         const data = await response.json();
 
-        // Fix 1: Filter out the header row and any empty trailing rows
+        // Safe filtering to prevent NaN and undefined array crashes
         const validData = data.filter((row, index) => index > 0 && row.length > 1 && !isNaN(parseFloat(row[1])));
         const latestData = validData[validData.length - 1];
         
         const kpIndex = parseFloat(latestData[1]);
         
-        // Fix 2: Convert NOAA's "YYYY-MM-DD HH:MM:SS" to strict ISO "YYYY-MM-DDTHH:MM:SSZ" for browser compatibility
+        // Strict ISO formatting for the timestamp
         const timeString = latestData[0].replace(' ', 'T');
         const timestamp = new Date(timeString + "Z");
 
