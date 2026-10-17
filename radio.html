@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
+  <link rel="icon" type="image/png" href="favicon.png">
   <title>Live Radio | Hawkes House</title>
   
-  <!-- This script teaches your browser how to play modern BBC HLS streams -->
+  <!-- HLS script for modern BBC streams -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   
   <style>
@@ -17,6 +17,7 @@
       --accent: #38bdf8;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
+      --success: #10b981;
     }
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -31,7 +32,7 @@
       box-sizing: border-box;
     }
     .container {
-      max-width: 600px;
+      max-width: 650px;
       width: 100%;
     }
     a.back-link {
@@ -39,36 +40,66 @@
       text-decoration: none;
       display: inline-block;
       margin-bottom: 2rem;
-      font-size: 1rem;
+      font-size: 0.95rem;
       transition: color 0.2s;
     }
     a.back-link:hover {
       color: var(--accent);
     }
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
     .header h1 {
-      font-size: 2rem;
-      margin-top: 0;
-      margin-bottom: 2rem;
+      font-size: 2.2rem;
+      margin: 0;
       letter-spacing: -0.025em;
     }
+    .header h1 span { color: var(--accent); }
+    .header p { color: var(--text-muted); margin-top: 0.5rem; }
+    
     .station {
       background-color: var(--card-bg);
       border: 1px solid #334155;
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .station:hover {
+      border-color: var(--accent);
+    }
+    .station-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
     }
     .station h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
+      margin: 0;
+      font-size: 1rem;
       color: var(--text-main);
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+    .live-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
     audio {
       width: 100%;
+      height: 36px;
       outline: none;
-      border-radius: 8px;
+      border-radius: 6px;
+      accent-color: var(--accent);
     }
   </style>
 </head>
@@ -78,48 +109,57 @@
     <a href="index.html" class="back-link">← Back to Dashboard</a>
     
     <div class="header">
-      <h1>Live Radio Streams</h1>
+      <h1>Live <span>Radio</span></h1>
+      <p>Hawkes House Audio Gateway</p>
     </div>
 
     <div class="station">
-      <h3>BBC Radio Nottingham</h3>
-      <!-- The source URL is handled by the script below for HLS streams -->
+      <div class="station-info">
+        <h3>BBC Radio Nottingham</h3>
+        <span class="live-badge">Live Stream</span>
+      </div>
       <audio id="audio-nottingham" controls preload="none"></audio>
     </div>
 
     <div class="station">
-      <h3>BBC Radio Leicester</h3>
-      <!-- The source URL is handled by the script below for HLS streams -->
+      <div class="station-info">
+        <h3>BBC Radio Leicester</h3>
+        <span class="live-badge">Live Stream</span>
+      </div>
       <audio id="audio-leicester" controls preload="none"></audio>
     </div>
 
     <div class="station">
-      <h3>Classic FM</h3>
+      <div class="station-info">
+        <h3>Classic FM</h3>
+        <span class="live-badge">Live Stream</span>
+      </div>
       <audio controls preload="none">
-        <!-- Direct secure stream from Global Radio -->
         <source src="https://media-ssl.musicradio.com/ClassicFM" type="audio/mpeg">
       </audio>
     </div>
 
     <div class="station">
-      <h3>University Radio Nottingham (URN)</h3>
+      <div class="station-info">
+        <h3>University Radio Nottingham (URN)</h3>
+        <span class="live-badge">Live Stream</span>
+      </div>
       <audio controls preload="none">
-        <!-- Direct secure streams using the correct .co.uk domain -->
         <source src="https://live.urn1350.co.uk/listen" type="audio/mpeg">
-        <source src="https://audio.urn1350.co.uk/high" type="audio/mpeg">
       </audio>
     </div>
 
     <div class="station">
-      <h3>Fosse 107</h3>
-      <!-- Stays on your worker to bypass HTTP Mixed-Content blocks -->
+      <div class="station-info">
+        <h3>Fosse 107</h3>
+        <span class="live-badge">Live Stream</span>
+      </div>
       <audio controls preload="none">
         <source src="https://radio-proxy.alfie-hawkes2006.workers.dev/?station=fosse" type="audio/mpeg">
       </audio>
     </div>
   </div>
 
-  <!-- This script block connects the official BBC Akamai HLS streams to your audio players -->
   <script>
     function setupHlsStream(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
@@ -128,12 +168,10 @@
         hls.loadSource(streamUrl);
         hls.attachMedia(audio);
       } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-        // Fallback for Safari which natively supports HLS
         audio.src = streamUrl;
       }
     }
 
-    // Official Akamai HLS streams updated to UK-only to bypass sports blackouts
     setupHlsStream('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     setupHlsStream('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
   </script>
