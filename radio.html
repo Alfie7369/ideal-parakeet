@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="referrer" content="no-referrer">
   <title>Live Radio | Hawkes House</title>
+  
+  <!-- This script teaches your browser how to play modern BBC HLS streams -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  
   <style>
     :root {
       --bg: #0f172a;
@@ -78,33 +81,50 @@
 
     <div class="station">
       <h3>BBC Radio Nottingham</h3>
-      <audio controls preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_nottingham?v=1" type="audio/mpeg">
-      </audio>
+      <!-- The source URL is handled by the script below for HLS streams -->
+      <audio id="audio-nottingham" controls preload="none"></audio>
     </div>
 
     <div class="station">
       <h3>BBC Radio Leicester</h3>
-      <audio controls preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_leicester?v=1" type="audio/mpeg">
-      </audio>
+      <!-- The source URL is handled by the script below for HLS streams -->
+      <audio id="audio-leicester" controls preload="none"></audio>
     </div>
 
     <div class="station">
       <h3>Greatest Hits Radio</h3>
+      <!-- Using Bauer's newer AAC edge server -->
       <audio controls preload="none">
-        <source src="https://stream-mz.planetradio.co.uk/net2national.mp3?v=1" type="audio/mpeg">
+        <source src="https://edge-bauermz-uk-live.planetradio.co.uk/net2national.aac" type="audio/aac">
       </audio>
     </div>
 
     <div class="station">
       <h3>Fosse 107</h3>
+      <!-- Stays on your worker to bypass HTTP Mixed-Content blocks -->
       <audio controls preload="none">
-        <!-- Keep Fosse on the proxy to fix the HTTP mixed-content error -->
         <source src="https://radio-proxy.alfie-hawkes2006.workers.dev/?station=fosse" type="audio/mpeg">
       </audio>
     </div>
   </div>
+
+  <!-- This script block connects the new BBC HLS streams to your audio players -->
+  <script>
+    function setupHlsStream(elementId, streamUrl) {
+      const audio = document.getElementById(elementId);
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(audio);
+      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        // Fallback for Safari which natively supports HLS
+        audio.src = streamUrl;
+      }
+    }
+
+    setupHlsStream('audio-nottingham', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_nottingham');
+    setupHlsStream('audio-leicester', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leicester');
+  </script>
 
 </body>
 </html>
