@@ -121,10 +121,9 @@
         audio.src = streamUrl;
       }
     }
-
-    // Official Akamai HLS streams from the Gist (upgraded to HTTPS)
-    setupHlsStream('audio-nottingham', 'https://as-hls-ww-live.akamaized.net/pool_96088503/live/ww/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
-    setupHlsStream('audio-leicester', 'https://as-hls-ww-live.akamaized.net/pool_04542919/live/ww/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
+// Official Akamai HLS streams updated to UK-only to bypass sports blackouts
+    setupHlsStream('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
+    setupHlsStream('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
   </script>
 
 </body>
