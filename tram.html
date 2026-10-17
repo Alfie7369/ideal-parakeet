@@ -104,45 +104,50 @@
     async function fetchTrams() {
       const board = document.getElementById('tram-board');
       try {
-        // Fetch departures using the AnyTransport API for NET stops
-        // 9400ZZNOUNI1 is the ATCO code for the University of Nottingham tram stop
-        const response = await fetch('https://net-tram-proxy.alfie-hawkes2006.workers.dev/');
+        // REPLACE THIS URL WITH YOUR CLOUDFLARE WORKER ADDRESS
+        const response = await fetch('https://net-tram-proxy.<your-subdomain>.workers.dev');
         const data = await response.json();
         
-        if (!data.departures || data.departures.length === 0) {
+        console.log("NET API Response:", data);
+
+        // Safely extract the departures array
+        const departures = Array.isArray(data) ? data : (data.departures || data.services || data.results);
+        
+        if (!departures || departures.length === 0) {
           board.innerHTML = '<div class="loading">No trams currently scheduled.</div>';
           return;
         }
 
-        board.innerHTML = ''; // Clear loading text
+        board.innerHTML = ''; 
 
-        data.departures.forEach(tram => {
+        departures.forEach(tram => {
           const row = document.createElement('div');
           row.className = 'tram-row';
           
-          const destination = tram.destination;
-          const dueTime = tram.expectedDeparture || tram.aimedDeparture || '--:--';
-          const waitText = tram.waitText || dueTime; // "Due", "7 min", etc.
-
+          const destination = tram.destination || tram.direction || 'NET Tram';
+          const dueTime = tram.expectedDeparture || tram.aimedDeparture || tram.time || '--:--';
+          
+          // Capture the live status (e.g., "On time" or "Scheduled") if the API provides it
+          const status = tram.status || tram.waitText || 'Due';
+          
           row.innerHTML = `
             <div class="time-col">${dueTime}</div>
             <div class="dest-col">
               <h3>${destination}</h3>
               <p>Nottingham Express Transit</p>
             </div>
-            <div class="status-col">${waitText}</div>
+            <div class="status-col">${status}</div>
           `;
           
           board.appendChild(row);
         });
 
       } catch (error) {
-        board.innerHTML = '<div class="loading" style="color: var(--warning);">Connecting to NET Tram Network...<br><small style="opacity:0.7">Awaiting API response or proxy routing.</small></div>';
+        board.innerHTML = '<div class="loading" style="color: var(--warning);">Failed to parse tram data.</div>';
         console.error("Error fetching tram data:", error);
       }
     }
 
-    // Load immediately, refresh every 60s
     fetchTrams();
     setInterval(fetchTrams, 60000);
   </script>
