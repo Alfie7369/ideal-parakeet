@@ -28,7 +28,7 @@
       box-sizing: border-box;
     }
     .container {
-      max-width: 650px;
+      max-width: 950px;
       width: 100%;
     }
     a.back-link {
@@ -47,70 +47,65 @@
       background-color: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 2rem;
+      padding: 1.5rem;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       position: relative;
-      overflow: hidden; /* Ensures nothing breaks out of the card container */
-    }
-
-    /* Clean Vertical Schematic Line */
-    .schematic {
-      position: relative;
-      margin-left: 140px; /* Space for live train badges on the left */
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-      border-left: 6px solid var(--weaver-maroon);
-    }
-
-    .station-node {
-      position: relative;
-      height: 40px;
-      display: flex;
-      align-items: center;
-    }
-
-    /* Station Dot */
-    .station-node::before {
-      content: '';
-      position: absolute;
-      left: -9px; /* Centers dot on the 6px line */
-      width: 10px;
-      height: 10px;
-      background-color: var(--bg);
-      border: 3px solid var(--weaver-maroon);
-      border-radius: 50%;
-      z-index: 2;
-    }
-
-    /* Interchange Dot Style */
-    .station-node.interchange::before {
-      border: 3px solid var(--text-main);
-      background-color: var(--weaver-maroon);
-    }
-
-    .station-name {
-      margin-left: 1.2rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-    .station-node.interchange .station-name { font-weight: bold; }
-
-    /* Live Train Badges */
-    .train-badge {
-      position: absolute;
-      left: -125px; /* Puts badge neatly in the left margin */
-      background-color: var(--train-bg);
-      color: var(--bg);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      z-index: 3;
-      white-space: nowrap;
+      overflow: hidden;
     }
 
     .loading { text-align: center; color: var(--text-muted); margin-bottom: 1rem; }
+
+    /* SVG Map Styling */
+    svg {
+      width: 100%;
+      height: auto;
+      max-height: 700px;
+    }
+    .tfl-line {
+      fill: none;
+      stroke: var(--weaver-maroon);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .station-dot {
+      fill: var(--card-bg);
+      stroke: var(--weaver-maroon);
+      stroke-width: 3.5;
+      r: 5;
+      transition: transform 0.2s;
+    }
+    .station-dot.interchange {
+      fill: var(--weaver-maroon);
+      stroke: var(--text-main);
+      stroke-width: 3;
+      r: 6;
+    }
+    .station-label {
+      fill: var(--text-main);
+      font-size: 11px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-weight: 500;
+    }
+    .station-label.interchange {
+      font-weight: bold;
+    }
+
+    /* Live Train Markers on SVG */
+    .train-marker {
+      cursor: pointer;
+    }
+    .train-bubble {
+      fill: var(--train-bg);
+      rx: 4;
+      ry: 4;
+    }
+    .train-text {
+      fill: var(--bg);
+      font-size: 10px;
+      font-weight: bold;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -120,68 +115,126 @@
     
     <div class="header">
       <h1>London <span>Overground</span></h1>
-      <p style="color: var(--text-muted); margin-top:0;">Weaver Line Live Tracker (Cheshunt / Enfield Branch)</p>
+      <p style="color: var(--text-muted); margin-top:0;">Official Schematic Map Layout (Weaver Line)</p>
     </div>
 
     <div class="board">
-      <div id="status-text" class="loading">Connecting to TfL Unified API...</div>
+      <div id="status-text" class="loading">Generating schematic and connecting to TfL API...</div>
       
-      <div class="schematic" id="route-map">
-        <!-- Stations injected via JS -->
-      </div>
+      <!-- SVG Tube Map -->
+      <svg viewBox="0 0 800 850" id="tfl-map">
+        <!-- Lines (Weaver Line Maroon Paths) -->
+        <!-- Cheshunt Branch -->
+        <path class="tfl-line" d="M 150 50 L 250 100 L 250 150" />
+        <!-- Enfield Branch -->
+        <path class="tfl-line" d="M 350 100 L 250 150" />
+        <!-- Trunk down through Seven Sisters and Hackney Downs -->
+        <path class="tfl-line" d="M 250 150 L 250 450 L 350 550 L 350 720" />
+        
+        <!-- Chingford Branch -->
+        <path class="tfl-line" d="M 600 80 L 500 130 L 500 200 L 400 300 L 350 350 L 350 550" />
+
+        <!-- Stations Grouped with Coordinates -->
+        <g id="station-nodes">
+          <!-- Cheshunt Branch -->
+          <circle class="station-dot interchange" cx="150" cy="50" data-station="Cheshunt"></circle>
+          <text class="station-label interchange" x="165" y="54" data-station="Cheshunt">Cheshunt</text>
+
+          <circle class="station-dot" cx="200" cy="75" data-station="Theobalds Grove"></circle>
+          <text class="station-label" x="215" y="79" data-station="Theobalds Grove">Theobalds Grove</text>
+
+          <circle class="station-dot" cx="250" cy="100" data-station="Turkey Street"></circle>
+          <text class="station-label" x="265" y="104" data-station="Turkey Street">Turkey Street</text>
+
+          <!-- Enfield Branch -->
+          <circle class="station-dot" cx="350" cy="100" data-station="Enfield Town"></circle>
+          <text class="station-label" x="300" y="85" data-station="Enfield Town">Enfield Town</text>
+
+          <circle class="station-dot" cx="300" cy="125" data-station="Bush Hill Park"></circle>
+          <text class="station-label" x="315" y="129" data-station="Bush Hill Park">Bush Hill Park</text>
+
+          <!-- Edmonton Green junction area -->
+          <circle class="station-dot interchange" cx="250" cy="150" data-station="Edmonton Green"></circle>
+          <text class="station-label interchange" x="140" y="154" data-station="Edmonton Green">Edmonton Green</text>
+
+          <circle class="station-dot" cx="250" cy="200" data-station="Silver Street"></circle>
+          <text class="station-label" x="265" y="204" data-station="Silver Street">Silver Street</text>
+
+          <circle class="station-dot" cx="250" cy="250" data-station="White Hart Lane"></circle>
+          <text class="station-label" x="265" y="254" data-station="White Hart Lane">White Hart Lane</text>
+
+          <circle class="station-dot" cx="250" cy="300" data-station="Bruce Grove"></circle>
+          <text class="station-label" x="265" y="304" data-station="Bruce Grove">Bruce Grove</text>
+
+          <circle class="station-dot interchange" cx="250" cy="350" data-station="Seven Sisters"></circle>
+          <text class="station-label interchange" x="160" y="354" data-station="Seven Sisters">Seven Sisters</text>
+
+          <circle class="station-dot" cx="250" cy="390" data-station="Stamford Hill"></circle>
+          <text class="station-label" x="265" y="394" data-station="Stamford Hill">Stamford Hill</text>
+
+          <circle class="station-dot" cx="250" cy="420" data-station="Stoke Newington"></circle>
+          <text class="station-label" x="265" y="424" data-station="Stoke Newington">Stoke Newington</text>
+
+          <circle class="station-dot" cx="250" cy="450" data-station="Rectory Road"></circle>
+          <text class="station-label" x="265" y="454" data-station="Rectory Road">Rectory Road</text>
+
+          <!-- Hackney Downs (Interchange with Chingford branch) -->
+          <circle class="station-dot interchange" cx="350" cy="550" data-station="Hackney Downs"></circle>
+          <text class="station-label interchange" x="370" y="554" data-station="Hackney Downs">Hackney Downs</text>
+
+          <!-- Chingford Branch Stations -->
+          <circle class="station-dot" cx="600" cy="80" data-station="Chingford"></circle>
+          <text class="station-label" x="615" y="84" data-station="Chingford">Chingford</text>
+
+          <circle class="station-dot" cx="550" cy="105" data-station="Highams Park"></circle>
+          <text class="station-label" x="565" y="109" data-station="Highams Park">Highams Park</text>
+
+          <circle class="station-dot" cx="500" cy="130" data-station="Wood Street"></circle>
+          <text class="station-label" x="515" y="134" data-station="Wood Street">Wood Street</text>
+
+          <circle class="station-dot interchange" cx="500" cy="200" data-station="Walthamstow Central"></circle>
+          <text class="station-label interchange" x="520" y="204" data-station="Walthamstow Central">Walthamstow Central</text>
+
+          <circle class="station-dot" cx="450" cy="250" data-station="St James Street"></circle>
+          <text class="station-label" x="360" y="250" data-station="St James Street">St James Street</text>
+
+          <circle class="station-dot" cx="400" cy="300" data-station="Clapton"></circle>
+          <text class="station-label" x="415" y="304" data-station="Clapton">Clapton</text>
+
+          <!-- Southern Trunk towards Liverpool Street -->
+          <circle class="station-dot" cx="350" cy="590" data-station="London Fields"></circle>
+          <text class="station-label" x="365" y="594" data-station="London Fields">London Fields</text>
+
+          <circle class="station-dot" cx="350" cy="630" data-station="Cambridge Heath"></circle>
+          <text class="station-label" x="365" y="634" data-station="Cambridge Heath">Cambridge Heath</text>
+
+          <circle class="station-dot" cx="350" cy="670" data-station="Bethnal Green"></circle>
+          <text class="station-label" x="260" y="670" data-station="Bethnal Green">Bethnal Green</text>
+
+          <circle class="station-dot interchange" cx="350" cy="720" data-station="London Liverpool Street"></circle>
+          <text class="station-label interchange" x="370" y="724" data-station="London Liverpool Street">Liverpool Street</text>
+        </g>
+
+        <!-- Live Train Badges Container -->
+        <g id="train-markers"></g>
+      </svg>
     </div>
   </div>
 
   <script>
-    // Primary Northern branches running down to Liverpool Street
-    const stations = [
-      { name: "Cheshunt", interchange: true },
-      { name: "Theobalds Grove", interchange: false },
-      { name: "Turkey Street", interchange: false },
-      { name: "Southbury", interchange: false },
-      { name: "Enfield Town", interchange: false },
-      { name: "Bush Hill Park", interchange: false },
-      { name: "Edmonton Green", interchange: true },
-      { name: "Silver Street", interchange: false },
-      { name: "White Hart Lane", interchange: false },
-      { name: "Bruce Grove", interchange: false },
-      { name: "Seven Sisters", interchange: true },
-      { name: "Stamford Hill", interchange: false },
-      { name: "Stoke Newington", interchange: false },
-      { name: "Rectory Road", interchange: false },
-      { name: "Hackney Downs", interchange: true },
-      { name: "London Fields", interchange: false },
-      { name: "Cambridge Heath", interchange: false },
-      { name: "Bethnal Green", interchange: false },
-      { name: "London Liverpool Street", interchange: true }
-    ];
-
-    const mapContainer = document.getElementById('route-map');
-
-    // Draw stations
-    stations.forEach(station => {
-      const node = document.createElement('div');
-      node.className = `station-node ${station.interchange ? 'interchange' : ''}`;
-      node.dataset.stationName = station.name;
-      
-      const label = document.createElement('div');
-      label.className = 'station-name';
-      label.textContent = station.name;
-      
-      node.appendChild(label);
-      mapContainer.appendChild(node);
-    });
-
     async function fetchLiveTrains() {
       try {
         const response = await fetch('https://api.tfl.gov.uk/Line/weaver/Arrivals');
         const data = await response.json();
         
-        document.querySelectorAll('.train-badge').forEach(badge => badge.remove());
+        const markerGroup = document.getElementById('train-markers');
+        markerGroup.innerHTML = ''; // Clear old badges
+
         const trainsByVehicle = {};
 
+        // Filter to find the nearest physical station for each train
         data.forEach(arrival => {
-          const cleanStationName = arrival.stationName.replace(' Rail Station', '').replace(' (London)', '');
+          const cleanStationName = arrival.stationName.replace(' Rail Station', '').replace(' (London)', '').trim();
           if (!trainsByVehicle[arrival.vehicleId] || arrival.timeToStation < trainsByVehicle[arrival.vehicleId].timeToStation) {
             trainsByVehicle[arrival.vehicleId] = {
               station: cleanStationName,
@@ -190,37 +243,46 @@
           }
         });
 
-        let mappedTrains = 0;
-        const stationBadgeCounts = {};
+        let mappedCount = 0;
+        const stationCounts = {};
 
         Object.values(trainsByVehicle).forEach(train => {
-          const stationElement = document.querySelector(`[data-station-name="${train.station}"]`);
+          // Find the matching station circle element in the SVG
+          const stationNode = document.querySelector(`circle[data-station="${train.station}"]`);
           
-          if (stationElement) {
-            stationBadgeCounts[train.station] = (stationBadgeCounts[train.station] || 0) + 1;
-            const offsetMultiplier = stationBadgeCounts[train.station] - 1;
-            
-            const topPosition = stationElement.offsetTop;
-            const badge = document.createElement('div');
-            badge.className = 'train-badge';
-            
+          if (stationNode) {
+            const cx = parseFloat(stationNode.getAttribute('cx'));
+            const cy = parseFloat(stationNode.getAttribute('cy'));
+
+            stationCounts[train.station] = (stationCounts[train.station] || 0) + 1;
+            const offset = (stationCounts[train.station] - 1) * 38;
+
             const mins = Math.round(train.timeToStation / 60);
-            badge.textContent = mins === 0 ? 'Due' : `${mins}m`;
+            const textContent = mins === 0 ? 'Due' : `${mins}m`;
+
+            // Create an SVG group for the train indicator bubble
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('class', 'train-marker');
             
-            // Stack multiple trains neatly side-by-side if they're at the same station
-            badge.style.top = `${topPosition + 12}px`;
-            badge.style.left = `-${125 + (offsetMultiplier * 45)}px`;
-            
-            mapContainer.appendChild(badge);
-            mappedTrains++;
+            // Position the marker nicely to the right/top of the station dot
+            const posX = cx + 18 + offset;
+            const posY = cy - 6;
+
+            g.innerHTML = `
+              <rect class="train-bubble" x="${posX}" y="${posY}" width="34" height="16"></rect>
+              <text class="train-text" x="${posX + 5}" y="${posY + 12}">${textContent}</text>
+            `;
+
+            markerGroup.appendChild(g);
+            mappedCount++;
           }
         });
 
-        document.getElementById('status-text').textContent = `Live Tracking Active: ${mappedTrains} trains on route.`;
+        document.getElementById('status-text').textContent = `Live Map Active: ${mappedCount} trains positioned on schematic.`;
         document.getElementById('status-text').style.color = 'var(--text-muted)';
 
       } catch (error) {
-        document.getElementById('status-text').textContent = "Failed to load live TfL data.";
+        document.getElementById('status-text').textContent = "Failed to load live TfL schematic data.";
         document.getElementById('status-text').style.color = "var(--train-bg)";
         console.error(error);
       }
