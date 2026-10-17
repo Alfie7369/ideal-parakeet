@@ -3,142 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hawkes House | Infrastructure</title>
+  <title>HawkesHouse Gateway</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #38bdf8;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-    }
     body {
-      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
       margin: 0;
-      padding: 2rem;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0b1120; /* Deep navy background from image_25e0d6.png */
+      color: #ffffff;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       min-height: 100vh;
+    }
+
+    .header-container {
+      text-align: center;
+      margin-top: 80px;
+      margin-bottom: 50px;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .title .house {
+      color: #38bdf8; /* Light blue accent from image_25e0d6.png */
+    }
+
+    .subtitle {
+      color: #94a3b8; /* Muted grey from image_25e0d6.png */
+      font-size: 0.95rem;
+      margin-top: 10px;
+      font-weight: 400;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      padding: 0 20px;
       box-sizing: border-box;
     }
-    .dashboard {
-      max-width: 800px;
-      width: 100%;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    .header h1 {
-      font-size: 2.5rem;
-      margin: 0;
-      letter-spacing: -0.025em;
-    }
-    .header h1 span { color: var(--accent); }
-    .header p { color: var(--text-muted); }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.5rem;
-    }
+
     .card {
-      background-color: var(--card-bg);
+      background-color: #1e293b; /* Dark card background from image_25e0d6.png */
       border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s, border-color 0.2s;
+      border-radius: 8px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, background-color 0.2s;
+      display: flex;
+      flex-direction: column;
     }
+
     .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
+      background-color: #27354a;
+      transform: translateY(-2px);
     }
+
     .card h2 {
-      font-size: 1rem;
-      margin-top: 0;
-      color: var(--text-muted);
+      font-size: 0.85rem;
+      color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.5px;
+      margin-top: 0;
+      margin-bottom: 20px;
       font-weight: 600;
     }
+
     .status-indicator {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-top: 1.5rem;
+      font-size: 0.95rem;
       font-weight: 500;
-      font-size: 0.9rem;
     }
+
     .dot {
       width: 10px;
       height: 10px;
-      background-color: var(--success);
       border-radius: 50%;
-      box-shadow: 0 0 10px var(--success);
-      animation: pulse 2s infinite;
+      margin-right: 12px;
     }
-    .dot.offline {
-      background-color: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
-      animation: none;
+
+    .dot.green {
+      background-color: #10b981; /* Online green from image_25e0d6.png */
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
     }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+
+    .dot.red {
+      background-color: #ef4444; /* Offline red from image_25e0d6.png */
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     }
   </style>
 </head>
 <body>
-  <div class="dashboard">
-    <div class="header">
-      <h1>Hawkes<span>House</span></h1>
-      <p>Infrastructure & Media Gateway</p>
-    </div>
-    <div class="grid">
-      
-      <div class="card">
-        <h2>Network (UniFi)</h2>
-        <div class="status-indicator">
-          <div class="dot offline"></div> Awaiting Hardware
-        </div>
-      </div>
-      <a href="media.html" style="text-decoration: none; color: inherit;">
-        <div class="card">
-          <h2>Media Archive</h2>
-          <div class="status-indicator" style="color: var(--text-muted);">
-            <div class="dot"></div> View CD Catalog
-          </div>
-        </div>
-      </a>
-      <div class="card">
-        <h2>Home Assistant</h2>
-        <div class="status-indicator">
-          <div class="dot offline"></div> Awaiting Hardware
-        </div>
-      </div>
-      <div class="card">
-        <h2>Public DNS</h2>
-        <div class="status-indicator">
-          <div class="dot"></div> Online & Secured
-        </div>
-      </div>
-      <a href="portfolio.html" style="text-decoration: none; color: inherit;">
-        <div class="card">
-          <h2>Academic Portfolio</h2>
-          <div class="status-indicator" style="color: var(--text-muted);">
-            <div class="dot"></div> View Mathematics
-          </div>
-        </div>
-      </a>
-    </div>
+
+  <div class="header-container">
+    <h1 class="title">Hawkes<span class="house">House</span></h1>
+    <div class="subtitle">Infrastructure & Media Gateway</div>
   </div>
-  
-  <!-- Replace YOUR_UNIQUE_STRING with your actual Cloudflare token -->
+
+  <div class="grid-container">
+    
+    <!-- Row 1 -->
+    <a href="#" class="card">
+      <h2>Network (UniFi)</h2>
+      <div class="status-indicator">
+        <div class="dot red"></div> Awaiting Hardware
+      </div>
+    </a>
+
+    <a href="#" class="card">
+      <h2>Media Archive</h2>
+      <div class="status-indicator">
+        <div class="dot green"></div> View CD Catalog
+      </div>
+    </a>
+
+    <a href="#" class="card">
+      <h2>Home Assistant</h2>
+      <div class="status-indicator">
+        <div class="dot red"></div> Awaiting Hardware
+      </div>
+    </a>
+
+    <!-- Row 2 -->
+    <a href="#" class="card">
+      <h2>Public DNS</h2>
+      <div class="status-indicator">
+        <div class="dot green"></div> Online & Secured
+      </div>
+    </a>
+
+    <a href="portfolio.html" class="card">
+      <h2>Academic Portfolio</h2>
+      <div class="status-indicator">
+        <div class="dot green"></div> View Mathematics
+      </div>
+    </a>
+
+    <!-- New Radio Card added to complete the 3x2 grid -->
+    <a href="radio.html" class="card">
+      <h2>Live Radio</h2>
+      <div class="status-indicator">
+        <div class="dot green"></div> Listen Now
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Cloudflare Web Analytics -->
   <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
+
 </body>
 </html>
