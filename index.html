@@ -3,163 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HawkesHouse Gateway</title>
+  <title>Hawkes House Dashboard</title>
   <style>
+    :root {
+      --text-muted: #a0a0a0;
+    }
     body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #0b1120; /* Deep navy background from image_25e0d6.png */
+      font-family: sans-serif;
+      background-color: #121212;
       color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
     }
-
-    .header-container {
-      text-align: center;
-      margin-top: 80px;
-      margin-bottom: 50px;
-    }
-
-    .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin: 0;
-      letter-spacing: -0.5px;
-    }
-
-    .title .house {
-      color: #38bdf8; /* Light blue accent from image_25e0d6.png */
-    }
-
-    .subtitle {
-      color: #94a3b8; /* Muted grey from image_25e0d6.png */
-      font-size: 0.95rem;
-      margin-top: 10px;
-      font-weight: 400;
-    }
-
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 900px;
-      padding: 0 20px;
-      box-sizing: border-box;
-    }
-
     .card {
-      background-color: #1e293b; /* Dark card background from image_25e0d6.png */
-      border: 1px solid #334155;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
       border-radius: 8px;
-      padding: 24px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.2s, background-color 0.2s;
-      display: flex;
-      flex-direction: column;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: background-color 0.2s;
     }
-
-    .card:hover {
-      background-color: #27354a;
-      transform: translateY(-2px);
+    a.card-link .card:hover {
+      background-color: #2a2a2a;
     }
-
     .card h2 {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       margin-top: 0;
-      margin-bottom: 20px;
-      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
     }
-
     .status-indicator {
       display: flex;
       align-items: center;
-      font-size: 0.95rem;
-      font-weight: 500;
+      font-size: 0.9rem;
     }
-
     .dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      margin-right: 12px;
+      background-color: #4CAF50; 
+      margin-right: 8px;
     }
-
-    .dot.green {
-      background-color: #10b981; /* Online green from image_25e0d6.png */
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    .dot.offline {
+      background-color: #f44336; 
     }
-
-    .dot.red {
-      background-color: #ef4444; /* Offline red from image_25e0d6.png */
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    .dot.neutral {
+      background-color: var(--text-muted); 
+    }
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block; 
+    }
+    .radio-button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .radio-button:hover {
+      background-color: #444;
     }
   </style>
 </head>
 <body>
 
-  <div class="header-container">
-    <h1 class="title">Hawkes<span class="house">House</span></h1>
-    <div class="subtitle">Infrastructure & Media Gateway</div>
+  <div class="card">
+    <h2>Home Assistant</h2>
+    <div class="status-indicator">
+      <div class="dot offline"></div> Awaiting Hardware
+    </div>
   </div>
 
-  <div class="grid-container">
-    
-    <!-- Row 1 -->
-    <a href="#" class="card">
-      <h2>Network (UniFi)</h2>
-      <div class="status-indicator">
-        <div class="dot red"></div> Awaiting Hardware
-      </div>
-    </a>
+  <div class="card">
+    <h2>Public DNS</h2>
+    <div class="status-indicator">
+      <div class="dot"></div> Online & Secured
+    </div>
+  </div>
 
-    <a href="#" class="card">
+  <a href="media.html" class="card-link">
+    <div class="card">
       <h2>Media Archive</h2>
-      <div class="status-indicator">
-        <div class="dot green"></div> View CD Catalog
+      <div class="status-indicator" style="color: var(--text-muted);">
+        <div class="dot neutral"></div> View CD Catalog
       </div>
-    </a>
+    </div>
+  </a>
 
-    <a href="#" class="card">
-      <h2>Home Assistant</h2>
-      <div class="status-indicator">
-        <div class="dot red"></div> Awaiting Hardware
-      </div>
-    </a>
-
-    <!-- Row 2 -->
-    <a href="#" class="card">
-      <h2>Public DNS</h2>
-      <div class="status-indicator">
-        <div class="dot green"></div> Online & Secured
-      </div>
-    </a>
-
-    <a href="portfolio.html" class="card">
+  <a href="portfolio.html" class="card-link">
+    <div class="card">
       <h2>Academic Portfolio</h2>
-      <div class="status-indicator">
-        <div class="dot green"></div> View Mathematics
+      <div class="status-indicator" style="color: var(--text-muted);">
+        <div class="dot neutral"></div> View Mathematics
       </div>
-    </a>
+    </div>
+  </a>
 
-    <!-- New Radio Card added to complete the 3x2 grid -->
-    <a href="radio.html" class="card">
-      <h2>Live Radio</h2>
-      <div class="status-indicator">
-        <div class="dot green"></div> Listen Now
-      </div>
-    </a>
-
+  <div style="margin-top: 5px;">
+    <a href="radio.html" class="radio-button">Live Radio Streams</a>
   </div>
 
-  <!-- Cloudflare Web Analytics -->
   <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
 
 </body>
