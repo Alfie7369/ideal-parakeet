@@ -3,14 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Radio | Alfie Hawkes</title>
+  <title>Live Radio | Hawkes House</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+    }
+    a.back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover {
+      color: var(--accent);
+    }
+    .header h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      letter-spacing: -0.025em;
+    }
+    .station {
+      background-color: var(--card-bg);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .station h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+    audio {
+      width: 100%;
+      outline: none;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
-  <a href="index.html">← Back to Home</a>
-  
-  <div class="radio-dashboard">
-    <h2>Live Radio Streams</h2>
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    
+    <div class="header">
+      <h1>Live Radio Streams</h1>
+    </div>
 
     <div class="station">
       <h3>BBC Radio Nottingham</h3>
