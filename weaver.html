@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="favicon.png">
-  <title>Weaver Line Tracker | Hawkes House</title>
+  <title>Weaver Line Map | Hawkes House</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -12,7 +12,7 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
-      --weaver-maroon: #9B0058; /* Official TfL Weaver Line Color */
+      --weaver-maroon: #9B0058;
       --train-bg: #f59e0b;
     }
     body {
@@ -28,7 +28,7 @@
       box-sizing: border-box;
     }
     .container {
-      max-width: 600px;
+      max-width: 900px; /* Widened to accommodate both branches */
       width: 100%;
     }
     a.back-link {
@@ -52,15 +52,24 @@
       position: relative;
     }
 
-    /* Schematic Map Styling */
-    .schematic {
+    /* Grid Layout for the Forked Map */
+    .map-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      /* Ensures the trunk spans both columns at the bottom */
+      grid-template-areas: 
+        "left-branch right-branch"
+        "trunk trunk";
+      gap: 0; 
+      margin-top: 2rem;
       position: relative;
-      margin-left: 120px; /* Space for the train badges on the left */
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-      border-left: 8px solid var(--weaver-maroon);
     }
 
+    .branch-enfield { grid-area: left-branch; }
+    .branch-chingford { grid-area: right-branch; }
+    .trunk { grid-area: trunk; margin-top: 45px;} /* Gap for the split visual */
+
+    /* Shared Station Node Styles */
     .station-node {
       position: relative;
       height: 45px;
@@ -68,11 +77,9 @@
       align-items: center;
     }
 
-    /* The station dot */
     .station-node::before {
       content: '';
       position: absolute;
-      left: -12px; /* Centers the 16px dot on the 8px line */
       width: 12px;
       height: 12px;
       background-color: var(--bg);
@@ -80,32 +87,60 @@
       border-radius: 50%;
       z-index: 2;
     }
-
-    /* Interchanges get a special style */
     .station-node.interchange::before {
       border: 4px solid var(--text-main);
       background-color: var(--weaver-maroon);
     }
-
     .station-name {
-      margin-left: 1.5rem;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
       font-weight: 500;
     }
+    .station-node.interchange .station-name { font-weight: bold; }
 
-    .station-node.interchange .station-name {
-      font-weight: bold;
+    /* Branch-Specific Adjustments */
+    .trunk .station-node, .branch-enfield .station-node {
+      border-left: 8px solid var(--weaver-maroon);
+      padding-left: 1.5rem;
+      margin-left: 150px; /* Space for train badges on the left */
+    }
+    .trunk .station-node::before, .branch-enfield .station-node::before {
+      left: -12px;
+    }
+
+    /* Chingford branch sits on the right side of its column */
+    .branch-chingford .station-node {
+      border-right: 8px solid var(--weaver-maroon);
+      padding-right: 1.5rem;
+      justify-content: flex-end;
+      margin-right: 150px; 
+    }
+    .branch-chingford .station-node::before {
+      right: -12px;
+    }
+
+    /* The 'Y' Fork Connector */
+    .fork-connector {
+      position: absolute;
+      top: -45px;
+      left: 150px; /* Aligns with the Enfield/Trunk line */
+      width: calc(100% - 300px); /* Stretches across to the Chingford line */
+      height: 45px;
+      border-top: 8px solid var(--weaver-maroon);
+      border-right: 8px solid var(--weaver-maroon);
+      border-left: 8px solid var(--weaver-maroon);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      z-index: 1;
     }
 
     /* Live Train Badges */
     .train-badge {
       position: absolute;
-      left: -110px; /* Pushes badge to the left of the line */
       background-color: var(--train-bg);
       color: var(--bg);
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
       transition: top 1s ease-in-out;
@@ -115,10 +150,12 @@
       align-items: center;
       gap: 4px;
     }
-
-    /* Directional arrows */
     .train-badge.northbound::after { content: '↑'; }
     .train-badge.southbound::after { content: '↓'; }
+
+    /* Badge Positioning Logic */
+    .trunk .train-badge, .branch-enfield .train-badge { left: -90px; }
+    .branch-chingford .train-badge { right: -90px; }
 
     .loading { text-align: center; color: var(--text-muted); margin-bottom: 1rem; }
   </style>
@@ -130,22 +167,34 @@
     
     <div class="header">
       <h1>London <span>Overground</span></h1>
-      <p style="color: var(--text-muted); margin-top:0;">Live Weaver Line Schematic (Enfield Branch)</p>
+      <p style="color: var(--text-muted); margin-top:0;">Live Weaver Line Schematic Map</p>
     </div>
 
     <div class="board">
       <div id="status-text" class="loading">Connecting to TfL Unified API...</div>
       
-      <!-- The schematic container -->
-      <div class="schematic" id="route-map">
-        <!-- Stations are injected here by JavaScript -->
+      <div class="map-grid">
+        <!-- LEFT BRANCH: Cheshunt & Enfield Town -->
+        <div class="branch-enfield" id="branch-enfield"></div>
+        
+        <!-- RIGHT BRANCH: Chingford -->
+        <div class="branch-chingford" id="branch-chingford"></div>
+        
+        <!-- MAIN TRUNK: Hackney Downs to Liverpool St -->
+        <div class="trunk" id="main-trunk">
+          <div class="fork-connector"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-   // The sequence of stations for the Enfield Town branch
-    const stations = [
+    // Define the segments of the map
+    const enfieldBranch = [
+      { name: "Cheshunt", interchange: true },
+      { name: "Theobalds Grove", interchange: false },
+      { name: "Turkey Street", interchange: false },
+      { name: "Southbury", interchange: false },
       { name: "Enfield Town", interchange: false },
       { name: "Bush Hill Park", interchange: false },
       { name: "Edmonton Green", interchange: true },
@@ -155,7 +204,19 @@
       { name: "Seven Sisters", interchange: true },
       { name: "Stamford Hill", interchange: false },
       { name: "Stoke Newington", interchange: false },
-      { name: "Rectory Road", interchange: false },
+      { name: "Rectory Road", interchange: false }
+    ];
+
+    const chingfordBranch = [
+      { name: "Chingford", interchange: false },
+      { name: "Highams Park", interchange: false },
+      { name: "Wood Street", interchange: false },
+      { name: "Walthamstow Central", interchange: true },
+      { name: "St James Street", interchange: false },
+      { name: "Clapton", interchange: false }
+    ];
+
+    const trunk = [
       { name: "Hackney Downs", interchange: true },
       { name: "London Fields", interchange: false },
       { name: "Cambridge Heath", interchange: false },
@@ -163,37 +224,38 @@
       { name: "London Liverpool Street", interchange: true }
     ];
 
-    const mapContainer = document.getElementById('route-map');
+    // Helper function to draw stations
+    function drawStations(stationArray, containerId) {
+      const container = document.getElementById(containerId);
+      stationArray.forEach(station => {
+        const node = document.createElement('div');
+        node.className = `station-node ${station.interchange ? 'interchange' : ''}`;
+        node.dataset.stationName = station.name;
+        
+        const label = document.createElement('div');
+        label.className = 'station-name';
+        label.textContent = station.name;
+        
+        node.appendChild(label);
+        container.appendChild(node);
+      });
+    }
 
-    // 1. Draw the static schematic map
-    stations.forEach((station, index) => {
-      const node = document.createElement('div');
-      node.className = `station-node ${station.interchange ? 'interchange' : ''}`;
-      node.dataset.stationName = station.name;
-      
-      const label = document.createElement('div');
-      label.className = 'station-name';
-      label.textContent = station.name;
-      
-      node.appendChild(label);
-      mapContainer.appendChild(node);
-    });
+    drawStations(enfieldBranch, 'branch-enfield');
+    drawStations(chingfordBranch, 'branch-chingford');
+    drawStations(trunk, 'main-trunk');
 
-    // 2. Fetch live data and plot actual physical trains
+    // 2. Fetch live data and plot physical trains
     async function fetchLiveTrains() {
       try {
         const response = await fetch('https://api.tfl.gov.uk/Line/weaver/Arrivals');
         const data = await response.json();
         
         document.querySelectorAll('.train-badge').forEach(badge => badge.remove());
-
-        // Group the API data by the physical train (vehicleId)
         const trainsByVehicle = {};
 
         data.forEach(arrival => {
           const cleanStationName = arrival.stationName.replace(' Rail Station', '').replace(' (London)', '');
-          
-          // Find the absolute nearest station for this specific physical train
           if (!trainsByVehicle[arrival.vehicleId] || arrival.timeToStation < trainsByVehicle[arrival.vehicleId].timeToStation) {
             trainsByVehicle[arrival.vehicleId] = {
               station: cleanStationName,
@@ -206,34 +268,40 @@
         let mappedTrains = 0;
         const stationBadgeCounts = {};
 
-        // Loop through our isolated physical trains and plot them
         Object.values(trainsByVehicle).forEach(train => {
           const stationElement = document.querySelector(`[data-station-name="${train.station}"]`);
           
           if (stationElement) {
-            // Track how many badges are at this station so they don't overlap
             stationBadgeCounts[train.station] = (stationBadgeCounts[train.station] || 0) + 1;
             const offsetMultiplier = stationBadgeCounts[train.station] - 1;
             
+            // Get the position relative to the specific column container
             const topPosition = stationElement.offsetTop;
-            const badge = document.createElement('div');
+            const parentSection = stationElement.parentElement.className;
             
+            const badge = document.createElement('div');
             const directionClass = train.direction === 'inbound' ? 'southbound' : 'northbound';
             badge.className = `train-badge ${directionClass}`;
             
             const mins = Math.round(train.timeToStation / 60);
             badge.textContent = mins === 0 ? 'Due' : `${mins} min`;
             
-            // Shift the badge further left if another train is already plotted here
-            badge.style.left = `-${110 + (offsetMultiplier * 75)}px`;
             badge.style.top = `${topPosition + 22}px`; 
             
-            mapContainer.appendChild(badge);
+            // Push badges out further if trains overlap
+            if (parentSection.includes('chingford')) {
+              badge.style.right = `-${90 + (offsetMultiplier * 60)}px`;
+            } else {
+              badge.style.left = `-${90 + (offsetMultiplier * 60)}px`;
+            }
+            
+            // Attach the badge directly to the correct section (trunk, left branch, or right branch)
+            stationElement.parentElement.appendChild(badge);
             mappedTrains++;
           }
         });
 
-        document.getElementById('status-text').textContent = `Live Tracking Active: ${mappedTrains} physical trains on route.`;
+        document.getElementById('status-text').textContent = `Live Tracking Active: ${mappedTrains} physical trains on network.`;
         document.getElementById('status-text').style.color = 'var(--text-muted)';
 
       } catch (error) {
