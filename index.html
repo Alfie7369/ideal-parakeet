@@ -41,6 +41,28 @@
     }
     .header h1 span { color: var(--accent); }
     .header p { color: var(--text-muted); }
+    
+    /* Date and Time Styling */
+    .datetime-card {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    #time-display {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+    #date-display {
+      color: var(--accent);
+      font-size: 1rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -100,6 +122,13 @@
       <h1>Hawkes<span>House</span></h1>
       <p>Infrastructure & Media Gateway</p>
     </div>
+
+    <!-- Date and Time Display -->
+    <div class="datetime-card">
+      <div id="time-display">00:00:00</div>
+      <div id="date-display">Loading date...</div>
+    </div>
+
     <div class="grid">
       
       <div class="card">
@@ -154,6 +183,26 @@
     </div>
   </div>
   
+  <script>
+    function updateDateTime() {
+      const now = new Date();
+      
+      // Format time (24-hour HH:MM:SS)
+      const timeString = now.toLocaleTimeString('en-GB');
+      
+      // Format date (e.g., Saturday, 17 October 2026)
+      const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const dateString = now.toLocaleDateString('en-GB', dateOptions);
+      
+      document.getElementById('time-display').innerText = timeString;
+      document.getElementById('date-display').innerText = dateString;
+    }
+    
+    // Run immediately so there's no delay, then update every 1000ms (1 second)
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+  </script>
+
   <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
 </body>
 </html>
