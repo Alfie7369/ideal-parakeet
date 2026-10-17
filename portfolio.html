@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hawkes House | Mathematics & Computing Portfolio</title>
+  
+  <!-- KaTeX for High-Performance Mathematics Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+  <!-- Pyodide for Browser-Based Python Execution -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --code-bg: #0b1120;
+      --success: #10b981;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    .header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .header-content h1 {
+      font-size: 2.2rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--accent);
+    }
+    .header-content p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    /* Python Interactive Terminal Styles */
+    .editor-container {
+      margin-top: 1rem;
+    }
+    textarea.code-editor {
+      width: 100%;
+      height: 250px;
+      background-color: var(--code-bg);
+      color: #a5b4fc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    textarea.code-editor:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .run-btn {
+      background-color: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: background-color 0.2s;
+    }
+    .run-btn:hover {
+      background-color: #7dd3fc;
+    }
+    .run-btn:disabled {
+      background-color: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+    .output-console {
+      margin-top: 1rem;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      min-height: 40px;
+      white-space: pre-wrap;
+      color: #a7f3d0;
+    }
+    .plot-container {
+      margin-top: 1rem;
+      text-align: center;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .math-content {
+      line-height: 1.7;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    
+    #pyodide-status {
+      display: inline-block;
+      margin-left: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <h1>Academic Portfolio</h1>
+        <p>BSc Mathematics, Year 2 • University of Nottingham</p>
+      </div>
+      <a href="index.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+
+    <h2 class="section-title">Coursework & Analysis</h2>
+    <div class="grid">
+      <div class="card">
+        <h2>Real Analysis</h2>
+        <div class="math-content">
+          <p>An exploration of limits and continuity. The formal (\( \epsilon, \delta \)) definition of a limit states that for a function \( f(x) \), \( \lim_{x \to c} f(x) = L \) if and only if:</p>
+          <p>$$ \forall \epsilon > 0, \exists \delta > 0 \text{ such that } 0 < |x - c| < \delta \implies |f(x) - L| < \epsilon $$</p>
+          <p>This rigor forms the foundation of advanced continuous models.</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>Statistical Modeling</h2>
+        <div class="math-content">
+          <p>Analysis of variance and linear regression models. The standard multiple linear regression model is defined as:</p>
+          <p>$$ Y_i = \beta_0 + \beta_1 X_{i1} + \dots + \beta_p X_{ip} + \epsilon_i $$</p>
+          <p>Where the error term is assumed to be normally distributed with a mean of zero and constant variance: \( \epsilon_i \sim N(0, \sigma^2) \).</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Interactive Computational Sandbox <span id="pyodide-status">Downloading Python & Matplotlib...</span></h2>
+    <div class="grid">
+      <div class="card" style="grid-column: 1 / -1;">
+        <p style="color: var(--text-muted); margin-top: 0; font-size: 0.9rem;">The code block below runs standard Python directly in your browser. You can edit the script and execute it to see live output.</p>
+        
+        <div class="editor-container">
+          <textarea id="python-code" class="code-editor" spellcheck="false">
+import matplotlib.pyplot as plt
+import numpy as np
+from js import document
+import io
+import base64
+
+# Create sample data
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+
+# Apply dark background to match the website theme
+plt.style.use('dark_background')
+
+# Generate the plot
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot(x, y, color='#38bdf8', linewidth=2)
+ax.set_title("Sine Wave Analysis", pad=15)
+ax.set_xlabel("Time (t)")
+ax.set_ylabel("Amplitude")
+ax.grid(True, alpha=0.2)
+
+# Save the plot to a temporary buffer
+buf = io.BytesIO()
+fig.savefig(buf, format='png', bbox_inches='tight', transparent=True)
+buf.seek(0)
+
+# Convert the buffer to a Base64 image string
+img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+
+# Inject the image directly into the HTML div
+plot_div = document.getElementById("plot-output")
+plot_div.innerHTML = f'<img src="data:image/png;base64,{img_base64}" alt="Matplotlib Graph" style="max-width: 100%; border-radius: 8px;">'
+
+print("Plot generated successfully!")
+          </textarea>
+          <button id="run-button" class="run-btn" disabled>Run Code</button>
+        </div>
+        
+        <div id="python-output" class="output-console">Output will appear here...</div>
+        <div id="plot-output" class="plot-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Pyodide
+    let pyodide;
+    
+    async function main() {
+      const statusElement = document.getElementById("pyodide-status");
+      const runButton = document.getElementById("run-button");
+      
+      try {
+        pyodide = await loadPyodide();
+        
+        // Explicitly load matplotlib and numpy
+        await pyodide.loadPackage(["numpy", "matplotlib"]);
+        
+        statusElement.textContent = "(Ready)";
+        statusElement.style.color = "var(--success)";
+        runButton.disabled = false;
+        
+        // Override Python's print() to route to the HTML console
+        pyodide.setStdout({ batched: (msg) => appendOutput(msg) });
+        pyodide.setStderr({ batched: (msg) => appendOutput(msg, true) });
+        
+      } catch (err) {
+        statusElement.textContent = "(Failed to load engine)";
+        statusElement.style.color = "#ef4444";
+      }
+    }
+    
+    main();
+
+    // Handle Code Execution
+    const runButton = document.getElementById("run-button");
+    const outputConsole = document.getElementById("python-output");
+    const plotOutput = document.getElementById("plot-output");
+    
+    function appendOutput(msg, isError = false) {
+      const span = document.createElement("span");
+      span.textContent = msg + "\n";
+      if (isError) span.style.color = "#ef4444";
+      outputConsole.appendChild(span);
+    }
+
+    runButton.addEventListener("click", async () => {
+      const code = document.getElementById("python-code").value;
+      outputConsole.innerHTML = ""; 
+      
+      try {
+        await pyodide.runPythonAsync(code);
+      } catch (err) {
+        appendOutput(err, true);
+      }
+    });
+  </script>
+  
+  <!-- Cloudflare Web Analytics -->
+  <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
+</body>
+</html>

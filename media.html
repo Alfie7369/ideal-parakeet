@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hawkes House | Media Catalog</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    .header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: var(--accent);
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .album-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .album-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+    .album-header {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .album-cover {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+      object-fit: cover;
+      background-color: var(--bg);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      flex-shrink: 0;
+    }
+    .album-info {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .album-title {
+      font-size: 1.15rem;
+      margin: 0 0 0.35rem 0;
+      color: var(--text-main);
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .album-meta {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .track-list {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      flex-grow: 1;
+    }
+    
+    #raw-data {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Media Archive</h1>
+      <a href="index.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+    
+    <div id="album-grid" class="album-grid"></div>
+
+    <table id="raw-data">
+      <tbody>
+        <tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>When I Kissed the Teacher</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Dancing Queen</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>My Love, My Life</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Dum Dum Diddle</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Knowing Me, Knowing You</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Money, Money, Money</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>That’s Me</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Why Did It Have to Be Me</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Tiger</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Arrival</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Fernando</td></tr>
+<tr><td class="artist-name">ABBA</td><td class="album-title">Arrival</td><td>2001</td><td>Happy Hawaii</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>The View From the Afternoon</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>I Bet You Look Good on the Dancefloor</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Fake Tales of San Francisco</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Dancing Shoes</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>You Probably Couldn’t See for the Lights but You Were Staring Straight at Me</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Still Take You Home</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Riot Van</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Red Light Indicates Doors Are Secured</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Mardy Bum</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>Perhaps Vampires Is a Bit Strong But…</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>When the Sun Goes Down</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>From the Ritz to the Rubble</td></tr>
+<tr><td class="artist-name">Arctic Monkeys</td><td class="album-title">Whatever People Say I Am, That’s What I’m Not</td><td>2006</td><td>A Certain Romance</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 104 in D major ‘London’ Hob I:104: I Adagio – Allegro</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 104 in D major ‘London’ Hob I:104: II Andante</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 104 in D major ‘London’ Hob I:104: III Minuet: Allegro – Trio</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 104 in D major ‘London’ Hob I:104: IV Finale: Spiritoso</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 6 in D major ‘Le Matin’ Hob I:6: I Adagio – Allegro</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony No. 6 in D major ‘Le Matin’ Hob I:6: II Adagio – Andante – Adagio</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 6 in D major ‘Le Matin’ Hob I:6: III Minuet – Trio</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 6 in D major ‘Le Matin’ Hob I:6: IV Finale: Allegro</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 8 in G major ‘Le Soir’ Hob I:8: I Allegro molto</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 8 in G major ‘Le Soir’ Hob I:8: II Andante</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 8 in G major ‘Le Soir’ Hob I:8: III Minuet – Trio</td></tr>
+<tr><td class="artist-name">Joseph Haydn</td><td class="album-title">BBC Music, Volume 34, Number 7: Symphonies no. 6 / no. 8 / no. 104</td><td>2026</td><td>Symphony no. 8 in G major ‘Le Soir’ Hob I:8: IV La Tempesta: Presto</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Vysehrad</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Vltava</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Sarka</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Z Ceskych Luhu a Haju</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Tabor</td></tr>
+<tr><td class="artist-name">Czech Philharmonic Orchestra</td><td class="album-title">Ma Vlast</td><td>1995</td><td>Blanik</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>My Way</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Strangers in the Night</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Theme From New York New York</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>I Get a Kick Out of You</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Nancy Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Somethin’ Stupid</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Moon River</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>What Now My Love</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Summer Wind</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>For Once in My Life</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Love and Marriage</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>They Can’t Take That Away From Me</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>My Kind of Town</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Count Basie and His Orchestra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Fly Me to the Moon</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>I’ve Got You Under My Skin</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Count Basie and His Orchestra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>The Best Is Yet to Come</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>It Was a Very Good Year</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Come Fly With Me</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>That’s Life</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Antônio Carlos Jobim</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>The Girl From Ipanema</td></tr>
+<tr><td class="artist-name">Frank Sinatra feat. Woody Herman and The Young Thundering Herd</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>The Lady Is a Tramp</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Bad, Bad Leroy Brown</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Quincy Jones and Orchestra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Mack the Knife</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>Love’s Been Good to Me</td></tr>
+<tr><td class="artist-name">Frank Sinatra with Quincy Jones and Orchestra</td><td class="album-title">My Way: The Best of Frank Sinatra</td><td>1997</td><td>L.A. Is My Lady</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>Come Fly With Me</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>You Make Me Feel So Young</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>Night and Day</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>I’ve Got You Under My Skin</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>The Lady Is a Tramp</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>On the Sunny Side of the Street</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>I’ve Got My Love to Keep Me Warm</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>All the Way</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>My Funny Valentine</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>All or Nothing at All</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>Fly Me to the Moon</td></tr>
+<tr><td class="artist-name">Frank Sinatra</td><td class="album-title">Swings</td><td>2007</td><td>Luck Be a Lady</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Moonlight Serenade</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Little Brown Jug</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>In the Mood</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Pennsylvania Six-five Thousand</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Don't Sit Under the Apple Tree (with Anyone Else but Me)</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Sunrise Serenade</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Chattanooga Choo Choo</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Tuxedo Junction</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>American Patrol</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>I've Got a Gal in Kalamazoo</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Stardust</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>St. Louis Blues March</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Serenade in Blue</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Perfidia</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>Juke Box Saturday Night</td></tr>
+<tr><td class="artist-name">Glenn Miller</td><td class="album-title">The Unforgettable Glenn Miller</td><td>1985</td><td>A String of Pearls</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 01</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 02</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 03</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 04</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 05</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 06</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 07</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 08</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 09</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 10</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 11</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 12</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 13</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 14</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 15</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 16</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 01</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 02</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 03</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 04</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 05</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 06</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 07</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 08</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 09</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 10</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 11</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 12</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 13</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 14</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 15</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">Glenn Miller Favourites</td><td>Unknown Year</td><td>Track 16</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 01</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 02</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 03</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 04</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 05</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 06</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 07</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 08</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 09</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 10</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 11</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 12</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 13</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 14</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 15</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 16</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 17</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 18</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 19</td></tr>
+<tr><td class="artist-name">Glenn Miller Orchestra</td><td class="album-title">In The Mood For Romance</td><td>Unknown Year</td><td>Track 20</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>On the Beautiful Blue Danube</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Epmeror Waltz</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Tales from the Vienna Woods</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Voices of Spring</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Artist's Life</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Roses from the South</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Vienna Blood</td></tr>
+<tr><td class="artist-name">Willi Boskovsky</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Wine, Women and Song</td></tr>
+<tr><td class="artist-name">Johann Strauss I</td><td class="album-title">The Blue Danube and other Viennese favourites</td><td>2005</td><td>Radetzky Marth</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Serenade No 13 in G - Eine kleine Nachtmusik K525 - I Allegro</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Serenade No 13 in G - Eine kleine Nachtmusik K525 - II Romanze (Andante)</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Serenade No 13 in G - Eine kleine Nachtmusik K525 - III Menuetto (Allegretto) & Trio</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Serenade No 13 in G - Eine kleine Nachtmusik K525 - IV Rondo (Allegro)</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Flute and Harp Concerto in C K299 - I Allegro</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Flute and Harp Concerto in C K299 - II Andantino</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Flute and Harp Concerto in C K299 - III Rondeau (Allegro)</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Clarinet Concerto in A K622 - I Allegro</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Clarinet Concerto in A K622 - II Adagio</td></tr>
+<tr><td class="artist-name">HMV Classics</td><td class="album-title">Mozart Clarinet Concerto, Eine Kleine Nachtmusik, Flute & Harp Concerto</td><td>2005</td><td>Clarinet Concerto in A K622 - III Rondo (Allegro)</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Mass In B Minor BWV 232 Sanctus & Pleni Sunt Coeli</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Suite For Solo Cello D Major BWV 1012/1: Prelude</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Peasant Cantata BWV 212/ No.14-16</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Chorale Prelude BWV 650</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Prelude C Minor BWV 921</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Choral BWV 436</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Preludes & Fugues BWV 846, 847, 851 From The Klavierbüchlein For W. F. Bach</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>St John Passion BWV 245, Versian II: Aria</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Sonata B Minor BWV 1030/III: Presto</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>St Matthew Passion BWV 244/No. 59-62</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Sonata C Minor BWV 1017/I & II: Largo - Allegro</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Passions-Pasticcio BWV 1088, Arioso</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Brandenburg Concerto No. 1 F Major BWV 1046/Movement 1</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Sacred Song BWV 454</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Sanctus In C Major BWV 237</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Sonata G Major BWV 1027/III & IV: Andante - Allegro moderato</td></tr>
+<tr><td class="artist-name">Johann Sebastian Bach</td><td class="album-title">An Introduction To The Complete Works Of Johann Sebastian Bach - The Millennium Edition</td><td>1999</td><td>Fugue G Minor BWV 542/II</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Prologue</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Harry’s Wondrous World</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Arrival of Baby Harry</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Visit to the Zoo / Letters from Hogwarts</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Diagon Alley / The Gringotts Vault</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Platform Nine-and-Three-Quarters / The Journey to Hogwarts</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Entry into the Great Hall / The Banquet</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Mr. Longbottom Flies</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Hogwarts Forever! / The Moving Stairs</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Norwegian Ridgeback / A Change of Season</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Quidditch Match</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Christmas at Hogwarts</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Invisibility Cloak / The Library Scene</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Fluffy’s Harp</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>In the Devil’s Snare / The Flying Keys</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Chess Game</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>The Face of Voldemort</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Leaving Hogwarts</td></tr>
+<tr><td class="artist-name">John Williams</td><td class="album-title">Harry Potter and the Philosopher’s Stone: Music From and Inspired by the Motion Picture</td><td>2001</td><td>Hedwig’s Theme</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Teenage Dream</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Last Friday Night (T.G.I.F.)</td></tr>
+<tr><td class="artist-name">Katy Perry feat. Snoop Dogg</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>California Gurls</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Firework</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Peacock</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Circle the Drain</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>The One That Got Away</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>E.T.</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Who Am I Living For?</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Pearl</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Hummingbird Heartbeat</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Not Like the Movies</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>The One That Got Away (acoustic)</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Part of Me</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Wide Awake</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Dressin’ Up</td></tr>
+<tr><td class="artist-name">Katy Perry feat. Kanye West</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>E.T.</td></tr>
+<tr><td class="artist-name">Katy Perry feat. Missy Elliott</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Last Friday Night (T.G.I.F.)</td></tr>
+<tr><td class="artist-name">Katy Perry</td><td class="album-title">Teenage Dream: The Complete Confection</td><td>2012</td><td>Tommie Sunshine’s Megasix Smash-Up</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>No One Mourns the Wicked</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Dear Old Shiz</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>The Wizard and I</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>What Is This Feeling?</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Something Bad</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Dancing Through Life</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Popular</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>I’m Not That Girl</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>One Short Day</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>A Sentimental Man</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Defying Gravity</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Thank Goodness</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Wonderful</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>I’m Not That Girl (reprise)</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>As Long as You’re Mine</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>No Good Deed</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>March of the Witch Hunters</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>For Good</td></tr>
+<tr><td class="artist-name">Kristin Chenoweth, Idina Menzel</td><td class="album-title">Wicked: A New Musical</td><td>2003</td><td>Finale</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Seeds</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>You'll never make it</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Time to let go</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Enough</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Neverending Dance</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Encore</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>You'll never make it (Live)</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">Falling In Circles</td><td>2025</td><td>Enough (Live)</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>One Single Person</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Dawn of Day</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Potsherd</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Hard to Find</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>The boy that never cries</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Circles</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Soul for Sale</td></tr>
+<tr><td class="artist-name">Marley Wildthing</td><td class="album-title">glasshouse</td><td>2022</td><td>Flow Wild</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Come Back To Me</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>I Wanna Be Like You</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Make Someone Happy</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>South Of The Border</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>In The Still Of The Night</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Blue Skies</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Lady Is A Tramp</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>The Days Of Wine</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Besame Mucho</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>From Russia With Love</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>The Good Life</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Somethings Gotta Give</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Sonny Boy</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>Spider Man</td></tr>
+<tr><td class="artist-name">Matt Ford & The Len Phillips Swing Orchestra</td><td class="album-title">From Abbey Road</td><td>Unknown Year</td><td>All The Way</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>It Only Takes A Moment</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Swingin' Down The Lane</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Do Nothing Till You Hear From Me</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Portrait Of My Love/Walk Away (medley)</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Spiderman</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Walking My Baby Back Home</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>If I Never Sing Another Song</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>For Once In My Life</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>My Kind Of Town</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Boulevard of Broken Dreams</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Sway</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Moonlight In Vermont</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Mack The Knife</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Nancy With The Laughing Face</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>Artificial Flowers</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">Live and Swingin'</td><td>2015</td><td>I Can't Stop Loving You</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Cry Me A River</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>In The Still Of The Night</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Ain't That A Kick In The Head</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Nature Boy</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>At Last</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>It Had Better Be Tonight</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Minnie The Moocher</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>The Borgia Stick</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Music To Watch Girls Go By</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>What Is This Thing Called Love?</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Mack The Knife</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>New York New York</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>In The Wee Small Hours Of The Morning</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>Feeling Good</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>My Way</td></tr>
+<tr><td class="artist-name">Matthew Ford & his big band</td><td class="album-title">The Swing Thing</td><td>Unknown Year</td><td>The Curtain Falls</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Scum Like Us</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Dreamseller</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Just Like You</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Little Shaw Lane</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>77</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>I Don't Mind</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Polaroid</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Better Alone</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Sarah Connor</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Leave Your Man</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>JIMSHARK</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Sunday</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Hurdles</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Is It Worth It?</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Oxygen</td></tr>
+<tr><td class="artist-name">The Mercians</td><td class="album-title">The Complete Works</td><td>2024</td><td>Distant</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Kansas City Stomp</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Fingerbreaker</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Don't You Leave Me Here</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>The Entertainer</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>The Cascades</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Solace - A Mexican Serenade</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Scott Joplin's New Rag</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Rippling Waters</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Echo of Spring</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Finger Buster</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>The Ragtime Betty</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Kansas City Rag</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Grace and Beauty</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Dictys on 7th Avenue</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Brittwood Rag</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>American Beauty Rag</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>The Ragtime Nightingale</td></tr>
+<tr><td class="artist-name">Morten Gunnar Larsen</td><td class="album-title">Fingerbreaker: Classics of Ragtime and Early Jazz Piano</td><td>1999</td><td>Sensation</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>obsessed</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>ballad of a homeschooled girl</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>vampire</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>drivers license</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>traitor</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>bad idea right?</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>love is embarrassing</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>pretty isn’t pretty</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>happier</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>enough for you</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo & Robert Smith</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>Friday I’m in Love</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo & Robert Smith</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>Just Like Heaven</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>so american</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>jealousy, jealousy</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>favorite crime</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>deja vu</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>brutal</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>all-american bitch</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>good 4 u</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">live from Glastonbury (a BBC recording)</td><td>2025</td><td>get him back</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Drop Dead</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Stupid Song</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Honeybee</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Maggots for Brains</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>U + Me = <3</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>My Way</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Purple</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>The Cure</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Begged</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo & Robert Smith</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>What’s Wrong With Me</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Less</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Expectations</td></tr>
+<tr><td class="artist-name">Olivia Rodrigo</td><td class="album-title">You Seem Pretty Sad for a Girl So in Love</td><td>2026</td><td>Cigarette Smoke</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Something Happened on the Way to Heaven</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Against All Odds (Take a Look at Me Now)</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Who Said I Would</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>One More Night</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Don’t Lose My Number</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Do You Remember?</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Another Day in Paradise</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Separate Lives</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>In the Air Tonight</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>You Can’t Hurry Love</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Two Hearts</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Sussudio</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>A Groovy Kind of Love</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Easy Lover</td></tr>
+<tr><td class="artist-name">Phil Collins</td><td class="album-title">Serious Hits… Live</td><td>1990</td><td>Take Me Home</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Manchild</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Tears</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>My Man on Willpower</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Sugar Talking</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>We Almost Broke Up Again Last Night</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Nobody's Son</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Never Getting Laid</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>When Did You Get Hot?</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Go Go Juice</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Don't Worry I'll Make You Worry</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>House Tour</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Man's Best Friend</td><td>2025</td><td>Goodbye</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Taste</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Please Please Please</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Good Graces</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Sharpest Tool</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Coincidence</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Bed Chem</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Espresso</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Dumb & Poetic</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Slim Pickins</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Juno</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Lie to Girls</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Don’t Smile</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>15 Minutes</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter feat. Dolly Parton</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Please Please Please</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Couldn’t Make It Any Harder</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Busy Woman</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short N' Sweet (Deluxe)</td><td>2025</td><td>Bad Reviews</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Taste</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Please Please Please</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Good Graces</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Sharpest Tool</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Coincidence</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Bed Chem</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Espresso</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Dumb & Poetic</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Slim Pickins</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Juno</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Lie to Girls</td></tr>
+<tr><td class="artist-name">Sabrina Carpenter</td><td class="album-title">Short n’ Sweet</td><td>2024</td><td>Don’t Smile</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>sticky</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>hush!</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>togethertogether</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>mine</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>desktop</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>pirates</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>giant designs - interlude</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>front seat honey</td></tr>
+<tr><td class="artist-name">SOFY</td><td class="album-title">Another Day in Paradise</td><td>2025</td><td>floating forever</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>A String Of Pearls</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Sun Valley Jump</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Somewhere Over The Rainbow</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>The St. Louis Blues March</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Stardust</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Cherokee</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Swing Low Sweet Chariot</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Adios</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Holiday For Strings</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>American Patrol</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>If I Had You</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Caribbean Clipper</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Embraceable You</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Jeep Jockey Jump</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Tuxedo Junction</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Three Coins In The Fountain</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Anchors Aweigh</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>Moonlight Serenade</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">A Salute To Glenn Miller</td><td>2003</td><td>In The Mood</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Lover</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Basin St Blues March</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Autumn In New York</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Before The Parade Passes By</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>My Hero</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Bill Bailey Won't You Please Come Home</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Maybe September</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Cherokee</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Girl Talk</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Lullabay Of Broadway</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Just In Time</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Under A Blanket Of Blue</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>This Could Be The Start Of Something Big</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Hallelujah</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>I Dream Of Jeannie</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>One</td></tr>
+<tr><td class="artist-name">Syd Lawrence Orchestra</td><td class="album-title">Strictly Big Band</td><td>2008</td><td>Slaughter On Tenth Avenue</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Welcome to New York (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Blank Space (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Style (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Out of the Woods (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>All You Had to Do Was Stay (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Shake It Off (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>I Wish You Would (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Bad Blood (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Wildest Dreams (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>How You Get the Girl (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>This Love (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>I Know Places (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Clean (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Wonderland (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>You Are in Love (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>New Romantics (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>“Slut!” (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Say Don’t Go (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Now That We Don’t Talk (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Suburban Legends (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">1989 (Taylor’s version)</td><td>2023</td><td>Is It Over Now? (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>willow</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>champagne problems</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>gold rush</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>’tis the damn season</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>tolerate it</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. HAIM</td><td class="album-title">evermore</td><td>2020</td><td>no body, no crime</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>happiness</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>dorothea</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. The National</td><td class="album-title">evermore</td><td>2020</td><td>coney island</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>ivy</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>cowboy like me</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>long story short</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>marjorie</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>closure</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Bon Iver</td><td class="album-title">evermore</td><td>2020</td><td>evermore</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>right where you left me</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">evermore</td><td>2020</td><td>it’s time to go</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>The Fate of Ophelia</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Elizabeth Taylor</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Opalite</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Father Figure</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Eldest Daughter</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Ruin the Friendship</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Actually Romantic</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Wi$h Li$t</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Wood</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>CANCELLED!</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>Honey</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Sabrina Carpenter</td><td class="album-title">The Life of a Showgirl</td><td>2025</td><td>The Life of a Showgirl</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>I Forgot That You Existed</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Cruel Summer</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Lover</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>The Man</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>The Archer</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>I Think He Knows</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Miss Americana & the Heartbreak Prince</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Paper Rings</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Cornelia Street</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Death by a Thousand Cuts</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>London Boy</td></tr>
+<tr><td class="artist-name">Taylor Swift featuring Dixie Chicks</td><td class="album-title">Lover</td><td>2019</td><td>Soon You’ll Get Better</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>False God</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>You Need to Calm Down</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Afterglow</td></tr>
+<tr><td class="artist-name">Taylor Swift featuring Brendon Urie of Panic! at the Disco</td><td class="album-title">Lover</td><td>2019</td><td>ME!</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>It’s Nice to Have a Friend</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Lover</td><td>2019</td><td>Daylight</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>…Ready for It?</td></tr>
+<tr><td class="artist-name">Taylor Swift & Ed Sheeran & Future</td><td class="album-title">reputation</td><td>2017</td><td>End Game</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>I Did Something Bad</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Don’t Blame Me</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Delicate</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Look What You Made Me Do</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>So It Goes…</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Gorgeous</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Getaway Car</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>King of My Heart</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Dancing With Our Hands Tied</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Dress</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>This Is Why We Can’t Have Nice Things</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>Call It What You Want</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">reputation</td><td>2017</td><td>New Year’s Day</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Mine (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Sparks Fly (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Back to December (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Speak Now (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Dear John (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Mean (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>The Story of Us (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Never Grow Up (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Enchanted (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Better Than Revenge (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Innocent (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Haunted (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Last Kiss (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Long Live (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Ours (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Superman (Taylor’s version)</td></tr>
+<tr><td class="artist-name">Taylor Swift featuring Fall Out Boy</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Electric Touch (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>When Emma Falls in Love (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>I Can See You (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift featuring Hayley Williams</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Castles Crumbling (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Foolish One (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Speak Now (Taylor’s version)</td><td>2023</td><td>Timeless (Taylor’s version) (from The Vault)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Tim McGraw</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Picture to Burn</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Teardrops on My Guitar</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>A Place in This World</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Cold as You</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>The Outside</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Tied Together With a Smile</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Stay Beautiful</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Should’ve Said No</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Mary’s Song (Oh My My My)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Our Song</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>I’m Only Me When I’m With You</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Invisible</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>A Perfectly Good Heart</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">Taylor Swift</td><td>2008</td><td>Teardrops on My Guitar (pop version)</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Post Malone</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Fortnight</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>The Tortured Poets Department</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>My Boy Only Breaks His Favorite Toys</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Down Bad</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>So Long, London</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>But Daddy I Love Him</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Fresh Out the Slammer</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Florence + the Machine</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Florida!!!</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Guilty as Sin?</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Who’s Afraid of Little Old Me?</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>I Can Fix Him (No Really I Can)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>loml</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>I Can Do It With a Broken Heart</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>The Smallest Man Who Ever Lived</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>The Alchemy</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>Clara Bow</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT</td><td>2024</td><td>The Bolter</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Post Malone</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Fortnight</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Tortured Poets Department</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>My Boy Only Breaks His Favorite Toys</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Down Bad</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>So Long, London</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>But Daddy I Love Him</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Fresh Out the Slammer</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Florence + the Machine</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Florida!!!</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Guilty as Sin?</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Who’s Afraid of Little Old Me?</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>I Can Fix Him (No Really I Can)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>loml</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>I Can Do It With a Broken Heart</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Smallest Man Who Ever Lived</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Alchemy</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Clara Bow</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Black Dog</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>imgonnagetyouback</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Albatross</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Chloe or Sam or Sophia or Marcus</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>How Did It End?</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>So High School</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>I Hate It Here</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>thanK you aIMee</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>I Look in People’s Windows</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Prophecy</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Cassandra</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Peter</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Bolter</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Robin</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>The Manuscript</td></tr>
+<tr><td class="artist-name">Taylor Swift feat. Post Malone</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Fortnight (acoustic version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Down Bad (acoustic version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>But Daddy I Love Him (acoustic version)</td></tr>
+<tr><td class="artist-name">Taylor Swift</td><td class="album-title">THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY</td><td>2024</td><td>Guilty as Sin? (acoustic version)</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>01 - Wonderful One</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>02 - Till</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>03 - September Song</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>04 - Suddenly</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>05 - I'm A Fool To Want You</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>06 - We Mustn't Say Goodbye</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>07 - Autumn Leaves</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>08 - Laura</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>09 - April In Paris</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>10 - Speak Low</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>11 - Tenderly</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>12 - Last Night When We Were Young</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>13 - Don't Worry 'Bout Me</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>14 - Dancing In The Dark</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>15 - I'm Comin' Virginia</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>16 - My Heart Sings</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>17 - It Never Was You</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>18 - You Took Advantage Of Me</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>19 - Close Your Eyes</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>20 - Stella By Starlight</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>21 - More Than You Know</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>22 - My Ship</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>23 - Lover Man</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>24 - Toot, Toot, Tootsie (Good Bye)</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>25 - Climb Every Mountain</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>26 - I Wanna Be Around</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>01 - I Didn't Know What Time It Was</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>02 - Bewitched</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>03 - Nobody's Heart Belongs To Me</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>04 - I'm Thru With Love</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>05 - My Funny Valentine</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>06 - The Man That Got Away</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>07 - Where Or When</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>08 - A Sleepin' Bee</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>09 - Happiness Is A Thing Called Joe</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>10 - Mam'Selle</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>11 - Just Friends</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>12 - Street Of Dreams</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>13 - I Left My Heart In San Francisco</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>14 - Once Upon A Time</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>15 - Tender Is The Night</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>16 - Smile</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>17 - Love For Sale</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>18 - Taking A Chance On Love</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>19 - Candy Kisses</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>20 - Have I Told You Lately</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>21 - Rules Of The Road</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>22 - Marry Young</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>23 - I'm Always Chasing Rainbows</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>24 - The Best Is Yet To Come</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>25 - Alone Together</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>26 - This Is All I Ask</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>27 - After You've Gone</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Four Classic Albums Plus Second Set</td><td>2021</td><td>28 - How Long Has This Been Going On</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Anything Goes</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Cheek to Cheek</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Nature Boy</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>I Can’t Give You Anything but Love</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>I Won’t Dance</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Firefly</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Lush Life</td></tr>
+<tr><td class="artist-name">Tony Bennett</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Sophisticated Lady</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>Let’s Face the Music and Dance</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>But Beautiful</td></tr>
+<tr><td class="artist-name">Tony Bennett & Lady Gaga</td><td class="album-title">Cheek to Cheek</td><td>2014</td><td>It Don’t Mean a Thing (If It Ain’t Got That Swing)</td></tr>
+<tr><td class="artist-name">Ian Watson</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Adagio in G minor</td></tr>
+<tr><td class="artist-name">Ludovico Einaudi</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Nefeli</td></tr>
+<tr><td class="artist-name">Chor der Deutschen Oper Berlin</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Act II Entr'acte (Carmen)</td></tr>
+<tr><td class="artist-name">The City of Prague Philharmonic Orchestra</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Sarabande</td></tr>
+<tr><td class="artist-name">Royal Philharmonic Orchestra</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Symphony no. 5: 4th movement, Adagietto</td></tr>
+<tr><td class="artist-name">Royal Liverpool Philharmonic Orchestra</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Adagio (Spartacus)</td></tr>
+<tr><td class="artist-name">Choir of Trinity College</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>The Lamb</td></tr>
+<tr><td class="artist-name">Royal Philharmonic Orchestra, Joseph Swanson</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Romance for violin and orchestra, No. 2 in F major  (Ludwig van Beethoven)</td></tr>
+<tr><td class="artist-name">Philharmonia Orchestra, Lesley Garrett</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Bailero (Songs of the Auvergne)  (Joseph Canteloube)</td></tr>
+<tr><td class="artist-name">The Academy of St. Martin-in-the-Fields, Andrei Gavrilov</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Piano Concerto in F minor, 2nd movement, BWV 1056  (Johann Sebastian Bach)</td></tr>
+<tr><td class="artist-name">City of London Sinfonia</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Canon in D  (Johann Pachelbel)</td></tr>
+<tr><td class="artist-name">Royal Liverpool Philharmonic Orchestra</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>At Church (Slovak Suite)  (Vítězslav Novák)</td></tr>
+<tr><td class="artist-name">Moscow Virtuosi, Yevgeny Kissin</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Piano Concerto No. 20, 2nd movement, Romance  (Wolfgang Amadeus Mozart)</td></tr>
+<tr><td class="artist-name">The Sixteen</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Missa Papae Marcelli, Agnus Dei I & II  (Giovanni Pierluigi da Palestrina)</td></tr>
+<tr><td class="artist-name">Howard Shelley</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Traumerei, Kindserzenen No. 7, Dreaming  (Robert Schumann)</td></tr>
+<tr><td class="artist-name">London Symphony Orchestra, Yuri Bashmet</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Romance for viola and orchestra  (Max Bruch)</td></tr>
+<tr><td class="artist-name">The Nash Ensemble</td><td class="album-title">Classic FM: Smooth Classics for Rough Days</td><td>2002</td><td>Aquarium (Carnival of the Animals)  (Camille Saint-Saëns)</td></tr>
+<tr><td class="artist-name">Prague Brass Ensemble & Aleš Bárta</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Ye, Who Are God's Warriors</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Hana Jonášová & Miroslav Laštovka</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Exultate jubilate: "Alleluja"</td></tr>
+<tr><td class="artist-name">Praga Sinfonietta & Miriam Němcová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Brandenburger Concerto No. 3 G Major, BWV 1048: I. Allegro</td></tr>
+<tr><td class="artist-name">Praga Sinfonietta & Miriam Němcová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Brandenburger Concerto No. 3 G Major, BWV 1048: II. Adagio</td></tr>
+<tr><td class="artist-name">Praga Sinfonietta & Miriam Němcová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Brandenburger Concerto No. 3 G Major, BWV 1048: III. Allegro</td></tr>
+<tr><td class="artist-name">Yvona Škvárová & Jan Kalfus</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Biblical Songs, Op. 99, B. 185: No. 7, By the Shore of the River Babylon</td></tr>
+<tr><td class="artist-name">Yvona Škvárová & Jan Kalfus</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Biblical Songs, Op. 99, B. 185: No. 5, Song of Gladness Will I Sing Thee</td></tr>
+<tr><td class="artist-name">Dana Mimrová & Josef Kšica</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Music for the Royal Fireworks, arr. J. Walsh 1749: Ouverture</td></tr>
+<tr><td class="artist-name">Dana Mimrová & Josef Kšica</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Music for the Royal Fireworks, arr. J. Walsh 1749: La paix</td></tr>
+<tr><td class="artist-name">Dana Mimrová & Josef Kšica</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Music for the Royal Fireworks, arr. J. Walsh 1749 Menuet</td></tr>
+<tr><td class="artist-name">Czech Radio Chamber Chorus & Prague String Orchestra & Štefan Britvík</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Ave Verum Corpus</td></tr>
+<tr><td class="artist-name">Aleš Bárta</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Preludium and Fugue G Major, BWV 541</td></tr>
+<tr><td class="artist-name">Jiřina Pokorná & Miroslav Kejmar</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Two Marches: La Majesté</td></tr>
+<tr><td class="artist-name">Jiřina Pokorná & Miroslav Kejmar</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Two Marches: La Vaillance</td></tr>
+<tr><td class="artist-name">Prague String Orchestra</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Suita D Dur: Air</td></tr>
+<tr><td class="artist-name">Josef Kšica & Tomáš Jindra</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Ave Maria</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: Stabat Mater</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: Cuius animam</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: O quam tristis</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: Eja Mater</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: Fac ut ardeat</td></tr>
+<tr><td class="artist-name">Consortium Pragense Orchestra & Yvona Škvárová</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Stabat Mater: Amen</td></tr>
+<tr><td class="artist-name">Prague Brass Ensemble & Aleš Bárta</td><td class="album-title">St. Nicholas Church Concert Collection</td><td>2000</td><td>Hussite song</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Ain't That a Kick in the Head</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Fly Me to the Moon</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Smile</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Let There Be Love</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>The Way You Look Tonight</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Come Fly With Me</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Mack the Knife</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>I Left My Heart in San Francisco</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Summer Wind</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Clementine</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>When I Fall in Love</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>Moon River</td></tr>
+<tr><td class="artist-name">Westlife</td><td class="album-title">....Allow Us to Be Frank</td><td>2004</td><td>That's Life</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const rows = document.querySelectorAll("#raw-data tbody tr");
+      const albums = {};
+      let albumCounter = 0;
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length < 4) return;
+        
+        const rowArtist = cells[0].textContent.trim();
+        const albumTitle = cells[1].textContent.trim();
+        const year = cells[2].textContent.trim();
+        const trackTitle = cells[3].textContent.trim();
+        
+        const albumKey = albumTitle + " | " + year;
+        
+        if (!albums[albumKey]) {
+          albums[albumKey] = {
+            id: albumCounter++,
+            mainArtist: rowArtist, 
+            title: albumTitle,
+            year: year,
+            tracks: []
+          };
+        }
+        
+        let finalTrackName = trackTitle;
+        if (rowArtist !== albums[albumKey].mainArtist) {
+          finalTrackName = trackTitle + ` <span style="font-size: 0.85em; opacity: 0.7;">— ${rowArtist}</span>`;
+        }
+        
+        albums[albumKey].tracks.push(finalTrackName);
+      });
+
+      const grid = document.getElementById("album-grid");
+      
+      Object.values(albums).forEach(album => {
+        const card = document.createElement("div");
+        card.className = "album-card";
+        
+        let trackItems = album.tracks.map(t => `<li>${t}</li>`).join("");
+        
+        card.innerHTML = `
+          <div class="album-header">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><rect width='70' height='70' fill='%230f172a'/></svg>" class="album-cover" id="cover-${album.id}" alt="Cover">
+            <div class="album-info">
+              <h2 class="album-title" title="${album.title}">${album.title}</h2>
+              <p class="album-meta">${album.mainArtist} • ${album.year}</p>
+            </div>
+          </div>
+          <ol class="track-list">
+            ${trackItems}
+          </ol>
+        `;
+        grid.appendChild(card);
+        
+        fetchArtwork(album.mainArtist, album.title, album.id);
+      });
+
+      async function fetchArtwork(artist, title, id) {
+        try {
+          const query = encodeURIComponent(`${artist} ${title}`);
+          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            const artworkUrl = data.results[0].artworkUrl100;
+            document.getElementById(`cover-${id}`).src = artworkUrl;
+          }
+        } catch (e) {
+          // Fails gracefully
+        }
+      }
+    });
+  </script>
+  
+  <!-- Replace YOUR_UNIQUE_STRING with your actual Cloudflare token -->
+  <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c666bf6781104f84b2c84ee0b34513cb"}'></script>
+</body>
+</html>
