@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Match Day | Hawkes House</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --live-red: #ef4444;
+      --villa-claret: #670E36;
+      --villa-blue: #95BFE5;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+    a.back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    a.back-link:hover { color: var(--accent); }
+    .header h1 { font-size: 2.2rem; margin: 0 0 0.5rem 0; }
+    .header h1 span { color: var(--accent); }
+    
+    .scoreboard {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 100px 1fr;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s;
+    }
+    .match-row:last-child { border-bottom: none; }
+    .match-row:hover { background-color: rgba(255,255,255,0.02); }
+    
+    /* Team Formatting */
+    .team {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .team.home { justify-content: flex-end; text-align: right; }
+    .team.away { justify-content: flex-start; text-align: left; }
+    
+    /* Specific Club Highlights */
+    .highlight-villa { color: var(--villa-blue); }
+    
+    /* Score formatting */
+    .score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin: 0 1rem;
+    }
+    .score-numbers {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-main);
+    }
+    .score-scheduled {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+    
+    /* Match Status tags */
+    .status {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-live { color: var(--live-red); display: flex; align-items: center; gap: 4px; }
+    .status-ft { color: var(--text-muted); }
+    .status-pending { color: var(--accent); }
+
+    /* Pulsing red dot for live games */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--live-red);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    @media (max-width: 600px) {
+      .match-row {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 0.75rem;
+      }
+      .team.home, .team.away { justify-content: center; text-align: center; }
+      .score-container { margin: 0 auto; width: 120px; }
+      .status { display: flex; justify-content: center; margin-bottom: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    
+    <div class="header">
+      <h1>Match Day <span>Scoreboard</span></h1>
+      <p style="color: var(--text-muted); margin-top:0;">Local & Tracked Fixtures</p>
+    </div>
+
+    <div class="scoreboard" id="scoreboard-container">
+      <!-- Matches injected via JS -->
+    </div>
+  </div>
+
+  <script>
+    // Mock data feed featuring the tracked clubs
+    const fixtures = [
+      {
+        home: "Aston Villa",
+        away: "Arsenal",
+        homeScore: "2",
+        awayScore: "1",
+        status: "72'",
+        state: "live",
+        isVillaHome: true
+      },
+      {
+        home: "Nottingham Forest",
+        away: "Chelsea",
+        homeScore: "1",
+        awayScore: "1",
+        status: "FT",
+        state: "finished"
+      },
+      {
+        home: "Leicester City",
+        away: "Everton",
+        homeScore: "-",
+        awayScore: "-",
+        status: "15:00",
+        state: "scheduled"
+      },
+      {
+        home: "Notts County",
+        away: "Wrexham",
+        homeScore: "3",
+        awayScore: "2",
+        status: "FT",
+        state: "finished"
+      }
+    ];
+
+    function renderScoreboard() {
+      const container = document.getElementById('scoreboard-container');
+      container.innerHTML = '';
+
+      fixtures.forEach(match => {
+        const row = document.createElement('div');
+        row.className = 'match-row';
+
+        // Format Status
+        let statusHtml = '';
+        if (match.state === 'live') {
+          statusHtml = `<div class="status status-live"><div class="pulse-dot"></div> ${match.status}</div>`;
+        } else if (match.state === 'finished') {
+          statusHtml = `<div class="status status-ft">${match.status}</div>`;
+        } else {
+          statusHtml = `<div class="status status-pending">Today</div>`;
+        }
+
+        // Format Score Box
+        let scoreHtml = '';
+        if (match.state === 'scheduled') {
+          scoreHtml = `<div class="score-scheduled">${match.status}</div>`;
+        } else {
+          scoreHtml = `<div class="score-numbers">${match.homeScore} - ${match.awayScore}</div>`;
+        }
+
+        // Highlight Villa
+        const homeClass = match.isVillaHome ? 'team home highlight-villa' : 'team home';
+        const awayClass = match.isVillaAway ? 'team away highlight-villa' : 'team away';
+
+        row.innerHTML = `
+          ${statusHtml}
+          <div class="${homeClass}">${match.home}</div>
+          <div class="score-container">${scoreHtml}</div>
+          <div class="${awayClass}">${match.away}</div>
+        `;
+        
+        container.appendChild(row);
+      });
+    }
+
+    renderScoreboard();
+  </script>
+</body>
+</html>
