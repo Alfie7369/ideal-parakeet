@@ -220,78 +220,118 @@
   </div>
 
   <script>
-    <script>
-    async function fetchLiveTrains() {
+    let activeCustomCrs = null;
+
+    async function fetchTrains(stationCode, boardId) {
+      const board = document.getElementById(boardId);
       try {
-        const response = await fetch('https://api.tfl.gov.uk/Line/weaver/Arrivals');
+        const response = await fetch(`https://huxley2.azurewebsites.net/departures/${stationCode}/10?expand=true`);
         const data = await response.json();
-        
-        const markerGroup = document.getElementById('train-markers');
-        markerGroup.innerHTML = ''; 
 
-        const trainsByVehicle = {};
+        // If the station exists but has no trains, or the code was slightly invalid and returned no services
+        if (!data.trainServices || data.trainServices.length === 0) {
+          board.innerHTML = '<div class="loading">No services currently running or invalid station code.</div>';
+          return;
+        }
 
-        // Filter: Only look at actual physical trains (vehicleId) and grab their absolute nearest stop
-        data.forEach(arrival => {
-          const cleanStationName = arrival.stationName.replace(' Rail Station', '').replace(' (London)', '').trim();
-          
-          // Only track trains that are actually arriving soon (within 15 minutes / 900 seconds)
-          if (arrival.timeToStation <= 900) {
-            if (!trainsByVehicle[arrival.vehicleId] || arrival.timeToStation < trainsByVehicle[arrival.vehicleId].timeToStation) {
-              trainsByVehicle[arrival.vehicleId] = {
-                station: cleanStationName,
-                timeToStation: arrival.timeToStation
-              };
-            }
+        board.innerHTML = ''; 
+
+        // Update the dynamic title if this is the custom board
+        if (boardId === 'board-CUSTOM' && data.locationName) {
+          document.getElementById('custom-title').textContent = data.locationName;
+        }
+
+        data.trainServices.forEach(train => {
+          const row = document.createElement('div');
+          row.className = 'train-row';
+
+          const destination = train.destination[0].locationName;
+          const std = train.std; 
+          const etd = train.etd; 
+          const platform = train.platform || '-';
+          const operator = train.operator;
+          const isCancelled = train.isCancelled;
+
+          let callingText = '';
+          if (train.subsequentCallingPoints && train.subsequentCallingPoints.length > 0) {
+            const pointsArray = train.subsequentCallingPoints[0].callingPoint.map(cp => cp.locationName);
+            callingText = `Calling at: ${pointsArray.join(', ')}`;
+          } else {
+            callingText = 'This train is at its destination.';
           }
-        });
 
-        let mappedCount = 0;
-        const stationCounts = {};
 
-        Object.values(trainsByVehicle).forEach(train => {
-          const stationNode = document.querySelector(`circle[data-station="${train.station}"]`);
-          
-          if (stationNode) {
-            // Limit to a maximum of 2 badges per station to prevent visual clutter
-            stationCounts[train.station] = (stationCounts[train.station] || 0) + 1;
-            if (stationCounts[train.station] > 2) return; 
 
-            const cx = parseFloat(stationNode.getAttribute('cx'));
-            const cy = parseFloat(stationNode.getAttribute('cy'));
 
-            const offset = (stationCounts[train.station] - 1) * 38;
-            const mins = Math.round(train.timeToStation / 60);
-            const textContent = mins === 0 ? 'Due' : `${mins}m`;
 
-            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            g.setAttribute('class', 'train-marker');
-            
-            const posX = cx + 16 + offset;
-            const posY = cy - 6;
+          let statusClass = 'status-delayed';
+          let statusText = etd;
 
-            g.innerHTML = `
-              <rect class="train-bubble" x="${posX}" y="${posY}" width="34" height="16"></rect>
-              <text class="train-text" x="${posX + 5}" y="${posY + 12}">${textContent}</text>
-            `;
-
-            markerGroup.appendChild(g);
-            mappedCount++;
+          if (isCancelled) {
+            statusClass = 'status-cancelled';
+            statusText = 'Cancelled';
+            callingText = train.cancelReason || 'Service cancelled.';
+          } else if (etd === 'On time') {
+            statusClass = 'status-ontime';
           }
-        });
 
-        document.getElementById('status-text').textContent = `Live Map Active: Showing ${mappedCount} upcoming trains.`;
-        document.getElementById('status-text').style.color = 'var(--text-muted)';
+          const mainInfo = `
+            <div class="main-info">
+              <div class="time-col">${std}</div>
+              <div class="dest-col">
+                <h3>${destination}</h3>
+              </div>
+              <div class="plat-col">${platform}</div>
+              <div class="status-col ${statusClass}">${statusText}</div>
+            </div>
+          `;
+
+          const subInfo = `
+            <div class="sub-info">
+              <div class="calling-at">${callingText}</div>
+              <div class="operator">${operator}</div>
+            </div>
+          `;
+          
+          row.innerHTML = mainInfo + subInfo;
+          board.appendChild(row);
+        });
 
       } catch (error) {
-        document.getElementById('status-text').textContent = "Failed to load live TfL schematic data.";
-        document.getElementById('status-text').style.color = "var(--train-bg)";
-        console.error(error);
+        board.innerHTML = '<div class="loading" style="color: var(--danger);">Failed to load Open Data feed. Ensure CRS is valid.</div>';
+        console.error(`Error fetching train data for ${stationCode}:`, error);
       }
     }
 
-    fetchLiveTrains();
-    setInterval(fetchLiveTrains, 30000);
+    function searchCustomStation() {
+      const input = document.getElementById('crs-input').value.toUpperCase().trim();
+      if (input.length === 3) {
+        activeCustomCrs = input;
+        document.getElementById('board-CUSTOM').innerHTML = '<div class="loading">Fetching live trains...</div>';
+        fetchTrains(activeCustomCrs, 'board-CUSTOM');
+      }
+    }
+
+    // Allow pressing "Enter" inside the text box to trigger the search
+    document.getElementById('crs-input').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        searchCustomStation();
+      }
+    });
+
+    function updateAllBoards() {
+      fetchTrains('NOT', 'board-NOT');
+      fetchTrains('TAM', 'board-TAM');
+      if (activeCustomCrs) {
+        fetchTrains(activeCustomCrs, 'board-CUSTOM');
+
+
+      }
+    }
+
+    updateAllBoards();
+    setInterval(updateAllBoards, 60000);
+    
   </script>
 
 </body>
