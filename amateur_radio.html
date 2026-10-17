@@ -222,29 +222,42 @@
       try {
         const response = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
         const data = await response.json();
+        
+        // Log the raw data to the console so you can inspect what NOAA is sending
+        console.log("Raw NOAA SWPC Data:", data);
 
         if (!Array.isArray(data) || data.length < 2) {
           throw new Error("NOAA returned an empty or invalid array.");
         }
 
-        // Bulletproof parsing: Read backwards from the end of the array to find the most recent valid Kp index
+        // Dynamically find the Kp column index in case NOAA changes their JSON structure
+        const headerRow = data[0];
+        let kpColIndex = headerRow.findIndex(col => col.toString().toLowerCase() === 'kp');
+        if (kpColIndex === -1) kpColIndex = 1; // Fallback to standard column 1
+
+        // Scan backwards to find the most recent valid numerical measurement
         let latestData = null;
+        let kpValue = 0;
+
         for (let i = data.length - 1; i > 0; i--) {
           const row = data[i];
-          // Ensure the row exists, has columns, and the Kp value (index 1) isn't null or empty
-          if (row && row.length > 1 && row[1] !== null && row[1] !== "") {
-            if (!isNaN(parseFloat(row[1]))) {
-              latestData = row;
-              break; 
+          if (Array.isArray(row) && row.length > kpColIndex) {
+            const rawVal = row[kpColIndex];
+            // Explicitly ignore string "null", true nulls, and blanks
+            if (rawVal !== null && rawVal !== "null" && rawVal !== "") {
+              const parsedVal = parseFloat(rawVal);
+              if (!isNaN(parsedVal)) {
+                latestData = row;
+                kpValue = parsedVal;
+                break; 
+              }
             }
           }
         }
 
         if (!latestData) {
-          throw new Error("Could not find any valid numerical Kp measurements in the feed.");
+          throw new Error("NOAA feed parsed, but all recent Kp values were blank or null.");
         }
-        
-        const kpIndex = parseFloat(latestData[1]);
         
         // Strict ISO formatting for the timestamp
         const timeString = latestData[0].replace(' ', 'T');
@@ -253,18 +266,18 @@
         let stormLevel = "QUIET";
         let stormClass = "status-good";
 
-        if (kpIndex >= 4 && kpIndex < 5) {
+        if (kpValue >= 4 && kpValue < 5) {
           stormLevel = "UNSETTLED";
           stormClass = "status-fair";
-        } else if (kpIndex >= 5) {
-          stormLevel = "STORM (G" + (Math.floor(kpIndex) - 4) + ")";
+        } else if (kpValue >= 5) {
+          stormLevel = "STORM (G" + (Math.floor(kpValue) - 4) + ")";
           stormClass = "status-poor";
         }
 
         document.getElementById('swpc-data').innerHTML = `
           <div class="metric-row">
             <div class="metric-label">Planetary K-Index</div>
-            <div class="metric-value ${stormClass}">Kp ${kpIndex.toFixed(2)}</div>
+            <div class="metric-value ${stormClass}">Kp ${kpValue.toFixed(2)}</div>
           </div>
           <div class="metric-row" style="margin-top: 1.5rem;">
             <div class="metric-label">Geomagnetic Field</div>
@@ -274,11 +287,13 @@
 
         document.getElementById('swpc-time').textContent = `Last NOAA update: ${timestamp.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 
-        calculateHFBands(kpIndex);
+        calculateHFBands(kpValue);
 
       } catch (error) {
-        console.error("Failed to load SWPC data:", error);
-        document.getElementById('swpc-data').innerHTML = '<div class="loading status-poor">NOAA FEED OFFLINE</div>';
+        console.error("Space Weather Error:", error);
+        document.getElementById('swpc-data').innerHTML = `
+          <div class="loading status-poor">NOAA FEED ERROR<br><span style="font-size:0.7rem; color:var(--text-muted);">${error.message}</span></div>
+        `;
       }
     }
 
