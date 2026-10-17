@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Numerical Calculus | Hawkes House</title>
+  
+  <!-- Load PyScript with numpy and matplotlib -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+  <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+  <py-config>
+    packages = ["numpy", "matplotlib"]
+  </py-config>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --error: #ef4444;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 750px;
+      width: 100%;
+    }
+    a.back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    a.back-link:hover { color: var(--accent); }
+    .header h1 { font-size: 2.2rem; margin: 0 0 0.5rem 0; }
+    .header h1 span { color: var(--accent); }
+    
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .input-group {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-col {
+      flex: 1;
+      min-width: 140px;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    input, select {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    
+    button {
+      background-color: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+      margin-top: 0.5rem;
+    }
+    button:hover { opacity: 0.9; }
+    
+    .output-box {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    #plot-output {
+      background-color: white; /* Matplotlib plots look best on white unless heavily styled */
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+    }
+    .error-text { color: var(--error); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="portfolio.html" class="back-link">← Back to Portfolio</a>
+    
+    <div class="header">
+      <h1>Numerical <span>Calculus</span></h1>
+      <p style="color: var(--text-muted); margin-top:0;">Derivatives, Integrals & Landing Times</p>
+    </div>
+
+    <div class="card">
+      <div class="input-group">
+        <label>Calculus Method</label>
+        <select id="method-select" onchange="updateUI()">
+          <option value="approx_deriv">Approximate Derivative</option>
+          <option value="extrapolate">Extrapolate Derivative</option>
+          <option value="gauss">Gauss Integration</option>
+          <option value="composite">Composite Integration</option>
+          <option value="composite_err">Composite Errors</option>
+          <option value="compute_time">Compute Landing Time</option>
+        </select>
+      </div>
+
+      <div class="input-group" id="func-group">
+        <label>Function f(x) (Python syntax)</label>
+        <input type="text" id="func-input" value="np.sin(x)">
+      </div>
+
+      <!-- Derivative inputs -->
+      <div class="input-group hidden" id="d2-group">
+        <label>Second Derivative f''(x)</label>
+        <input type="text" id="d2-input" value="-np.sin(x)">
+      </div>
+      <div class="input-group hidden" id="d4-group">
+        <label>Fourth Derivative f''''(x)</label>
+        <input type="text" id="d4-input" value="np.sin(x)">
+      </div>
+      
+      <!-- Integration exact function -->
+      <div class="input-group hidden" id="fint-group">
+        <label>Indefinite Integral F(x) (0 if none)</label>
+        <input type="text" id="fint-input" value="-np.cos(x)">
+      </div>
+
+      <div class="input-row">
+        <!-- Interval / Point -->
+        <div class="input-group input-col">
+          <label id="x-a-label">Point (x)</label>
+          <input type="number" id="x-a-input" value="1.0" step="any">
+        </div>
+        <div class="input-group input-col hidden" id="b-group">
+          <label>Interval End (b)</label>
+          <input type="number" id="b-input" value="2.0" step="any">
+        </div>
+
+        <!-- Arrays and Steps -->
+        <div class="input-group input-col" id="h-group">
+          <label>h Array (e.g., np.logspace(0, -5, 6))</label>
+          <input type="text" id="h-input" value="np.logspace(0, -5, 6)">
+        </div>
+        
+        <div class="input-group input-col hidden" id="panels-group">
+          <label>Panels Array (e.g., [10, 50, 100])</label>
+          <input type="text" id="panels-input" value="[10, 50, 100, 500]">
+        </div>
+        
+        <div class="input-group input-col hidden" id="nlevels-group">
+          <label>Levels (nlevels)</label>
+          <input type="number" id="nlevels-input" value="2">
+        </div>
+        
+        <!-- Landing Time variables -->
+        <div class="input-group input-col hidden" id="landing-group">
+          <label>Terminal Velocity (vterm)</label>
+          <input type="number" id="vterm-input" value="30.0" step="any">
+        </div>
+        <div class="input-group input-col hidden" id="height-group">
+          <label>Initial Height</label>
+          <input type="number" id="height-input" value="100.0" step="any">
+        </div>
+      </div>
+
+      <button id="calc-btn" py-click="run_calculus">Compute</button>
+    </div>
+
+    <div class="card">
+      <label>Results:</label>
+      <div id="text-output" class="output-box">Select a method and press Compute.</div>
+      <div id="plot-output"></div>
+    </div>
+  </div>
+
+  <script>
+    function updateUI() {
+      const m = document.getElementById('method-select').value;
+      const ids = ['func-group', 'd2-group', 'd4-group', 'fint-group', 'b-group', 'h-group', 'panels-group', 'nlevels-group', 'landing-group', 'height-group'];
+      ids.forEach(id => document.getElementById(id).classList.add('hidden'));
+      
+      const xaLabel = document.getElementById('x-a-label');
+
+      if (m === 'approx_deriv') {
+        xaLabel.innerText = "Point (x)";
+        document.getElementById('func-group').classList.remove('hidden');
+        document.getElementById('d2-group').classList.remove('hidden');
+        document.getElementById('h-group').classList.remove('hidden');
+      } else if (m === 'extrapolate') {
+        xaLabel.innerText = "Point (x)";
+        document.getElementById('func-group').classList.remove('hidden');
+        document.getElementById('d2-group').classList.remove('hidden');
+        document.getElementById('h-group').classList.remove('hidden');
+        document.getElementById('nlevels-group').classList.remove('hidden');
+      } else if (m === 'gauss') {
+        xaLabel.innerText = "Interval Start (a)";
+        document.getElementById('func-group').classList.remove('hidden');
+        document.getElementById('b-group').classList.remove('hidden');
+      } else if (m === 'composite') {
+        xaLabel.innerText = "Interval Start (a)";
+        document.getElementById('func-group').classList.remove('hidden');
+        document.getElementById('b-group').classList.remove('hidden');
+        document.getElementById('panels-group').classList.remove('hidden');
+        document.getElementById('fint-group').classList.remove('hidden');
+      } else if (m === 'composite_err') {
+        xaLabel.innerText = "Interval Start (a)";
+        document.getElementById('func-group').classList.remove('hidden');
+        document.getElementById('d2-group').classList.remove('hidden');
+        document.getElementById('d4-group').classList.remove('hidden');
+        document.getElementById('b-group').classList.remove('hidden');
+        document.getElementById('panels-group').classList.remove('hidden');
+        document.getElementById('fint-group').classList.remove('hidden');
+      } else if (m === 'compute_time') {
+        xaLabel.innerText = "Time Interval Start (a)";
+        document.getElementById('b-group').classList.remove('hidden');
+        document.getElementById('landing-group').classList.remove('hidden');
+        document.getElementById('height-group').classList.remove('hidden');
+      }
+    }
+  </script>
+
+  <script type="py">
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from pyscript import document, display
+
+    # --- PROVIDED & COURSEWORK FUNCTIONS ---
+    def centred_difference(x,h,f):
+        return (f(x+h)-2*f(x)+f(x-h))/(h*h)
+
+    def trapezoidal_integration(a,b,f):
+        return 0.5*(b-a)*(f(a)+f(b))
+
+    def approximate_derivative(x,h,nvalues,f,d2fdx2,produce_fig):
+        approx_values = np.zeros(nvalues, )
+        error_values  = np.zeros(nvalues, )
+        n=0
+        d2fdx2x = d2fdx2(x)
+        fig = plt.figure()
+        
+        while n < nvalues:
+            hn = h[n]
+            approx_values[n] = centred_difference(x, hn, f)
+            error_values[n] = np.abs(approx_values[n] - d2fdx2x)
+            n = n+1
+        
+        if produce_fig == True:
+            fig, ax = plt.subplots()
+            ax.loglog(h , error_values , "o", label="Error ",linestyle="-")
+            ax.set_xlabel("h")
+            ax.set_ylabel("Error Values")
+            ax.set_title("Log-Log plot of errors against h")
+            ax.grid(True)
+            
+        return approx_values, error_values, fig
+
+    def extrapolate_derivative(x,h,nvalues,nlevels,r,f,d2fdx2):
+        fig, ax = plt.subplots()
+        approx_values = np.zeros(nvalues,)
+        error_values  = np.zeros((nvalues, nlevels+1))   
+        DF = np.zeros((nvalues, nlevels+1))
+        d2fdx2x = d2fdx2(x)
+        
+        approx_values, err, _ = approximate_derivative(x, h, nvalues, f, d2fdx2, False) 
+        DF[:,0] = approx_values
+        error_values[:,0]= err
+        
+        p=2
+        for l in range(1, nlevels+1):
+            for k in range(nvalues-l):
+                DF[k,l] = (r**(p)* DF[k+1,l-1] - DF[k,l-1]) / (r**(p)-1)
+                error_values[k,l] = np.abs(DF[k,l]- d2fdx2x)
+            error_values[nvalues-l:, l] = 0
+            p = p + 2
+
+        for l in range(nlevels + 1):
+            nplot = nvalues-l
+            ax.loglog(h[:nplot] , error_values[:nplot,l] , "o", label= f'level {l}' ,linestyle="-")
+        
+        ax.set_xlabel("h")
+        ax.set_ylabel("Absolute Error")
+        ax.set_title("Log-Log plot of errors against h")
+        ax.grid(True)
+        ax.legend()
+        return error_values, fig
+
+    def gauss_integration(a,b,f):
+        w1, e1 = 1, -1/np.sqrt(3)
+        w2, e2 = 1, 1/np.sqrt(3)
+        w1 = ((b-a)/2)*w1    
+        w2 = ((b-a)/2)*w2
+        x1 = ((b-a)/2)*e1 +(b+a)/2
+        x2 = ((b-a)/2)*e2 +(b+a)/2
+        return w1 * f(x1) + w2 *f(x2)
+
+    def composite_integration(a,b,npanels,f,f_int,integration_rule):
+        h = (b - a) / npanels
+        integral = 0
+        for i in range(npanels):
+            x1 = a + i * h
+            x2 = a + (i + 1) * h
+            integral = integral + integration_rule(x1, x2, f)
+        
+        if f_int != 0:
+            exact = f_int(b) - f_int(a)
+            error_value = np.abs(exact - integral)
+        else:
+            error_value = None
+        return integral, error_value
+
+    def composite_errors(a,b,npanels,f,d2fdx2,d4fdx4,f_int):
+        l=len(npanels)
+        error_values = np.zeros((2,l)) 
+        error_bounds = np.zeros((2,l))
+        fig, ax = plt.subplots()
+        
+        x = np.linspace(a, b, 1001)
+        mid = 0.5 * (x[:-1] + x[1:])
+        maxf2 = np.max(np.abs(d2fdx2(mid)))
+        maxf4 = np.max(np.abs(d4fdx4(mid)))
+            
+        for i in range(0,l):
+            n = npanels[i]
+            h = (b-a)/n
+            composite_trapezoidal, error_trapezoidal = composite_integration(a,b,n,f,f_int,trapezoidal_integration)
+            error_values[0,i] = error_trapezoidal
+            composite_gauss, error_gauss = composite_integration(a,b,n,f,f_int,gauss_integration)
+            error_values[1,i] = error_gauss
+            error_bounds[0,i] = (b-a)* (h**2)/12 * maxf2
+            error_bounds[1,i] = (b-a)*(h**4)/4320 * maxf4
+        
+        ax.loglog(npanels , error_values[0,] , "o", label= "Trapezoidal error" ,linestyle="-")
+        ax.loglog(npanels , error_values[1,] , "s", label= "Gauss error" ,linestyle="-")
+        ax.loglog(npanels , error_bounds[0,] , "p", label= "Trapezoidal bound" ,linestyle="-")
+        ax.loglog(npanels , error_bounds[1,] , "*", label= "Gauss bound" ,linestyle="-")
+        
+        ax.set_xlabel("Npanels")
+        ax.set_ylabel("Error")
+        ax.set_title("Errors of composite integration")
+        ax.grid(True)
+        ax.legend()
+        return error_values, error_bounds, fig
+
+    def newton_with_stopping(f,df, p0,Nmax,TOL,p=None):
+        p_array=np.zeros(Nmax,)
+        er =np.zeros(Nmax)
+        x=np.zeros(Nmax)
+        n=1
+        
+        while n-1<Nmax:
+            p0=p0-f(p0)/df(p0) 
+            p_array[n-1]=p0 
+            x[n-1]=n 
+             
+            if p is not None: er[n-1]=abs(p0-p) 
+            pn=f(p0)
+            
+            if TOL is not None: 
+                if np.abs(pn)<TOL:
+                    if p is not None: er[n-1]=abs(p0-p)
+                    break
+            n=n+1
+            
+        fig = ax = None
+        if p is not None:
+             fig, ax = plt.subplots()
+             ax.set_yscale("log")
+             ax.set_xlabel("iterations")
+             ax.set_ylabel("error bound")
+             ax.set_title("Newton Method")
+             ax.grid(True)
+             ax.plot(x[0:n] , er[0:n] , "o", label="Newton Error ",linestyle="-")
+             ax.set_xticks(x[0:n])
+
+        if fig is not None and ax is not None:
+            ax.legend()
+            return p_array[0:n], fig, ax
+        else:
+            return p_array[0:n]
+
+    def compute_time(a,b,Nmax,TOL,hinitial,vterm):
+        g = 9.81
+        npanels = 500
+        t0 = 0.5 * (a+b)
+        
+        v = lambda x: vterm * np.tanh((g*x)/vterm)
+        f = lambda x: composite_integration(0, x, npanels, v, 0, gauss_integration)[0] - hinitial
+        
+        p_array = newton_with_stopping(f, v, t0, Nmax, TOL)
+        landing_time = p_array[-1]
+        niters = len(p_array)
+        return landing_time, niters
+
+
+    # --- UI EXECUTION HANDLER ---
+    def run_calculus(event):
+        txt_out = document.getElementById("text-output")
+        plot_out = document.getElementById("plot-output")
+        plot_out.innerHTML = ""  # Clear old plot
+        txt_out.innerText = "Computing..."
+        txt_out.style.color = "var(--accent)"
+
+        try:
+            m = document.getElementById("method-select").value
+            xa = float(document.getElementById("x-a-input").value)
+            
+            def safe_eval_func(s):
+                if s.strip() == "0": return 0
+                return lambda x: eval(s, {"np": np, "x": x})
+                
+            def safe_eval_array(s):
+                return eval(s, {"np": np})
+
+            if m in ['approx_deriv', 'extrapolate', 'gauss', 'composite', 'composite_err']:
+                f_str = document.getElementById("func-input").value
+                f = safe_eval_func(f_str)
+
+            if m == "approx_deriv":
+                h_arr = safe_eval_array(document.getElementById("h-input").value)
+                d2_str = document.getElementById("d2-input").value
+                d2 = safe_eval_func(d2_str)
+                
+                approx, err, fig = approximate_derivative(xa, h_arr, len(h_arr), f, d2, True)
+                txt_out.innerText = f"Approximations:\n{approx}\n\nErrors:\n{err}"
+                display(fig, target="plot-output", append=False)
+
+            elif m == "extrapolate":
+                h_arr = safe_eval_array(document.getElementById("h-input").value)
+                d2_str = document.getElementById("d2-input").value
+                d2 = safe_eval_func(d2_str)
+                nlevels = int(document.getElementById("nlevels-input").value)
+                r = 2 # hardcoded typical ratio if using standard halving
+                
+                err, fig = extrapolate_derivative(xa, h_arr, len(h_arr), nlevels, r, f, d2)
+                txt_out.innerText = f"Error Matrix:\n{err}"
+                display(fig, target="plot-output", append=False)
+                
+            elif m == "gauss":
+                b = float(document.getElementById("b-input").value)
+                integral = gauss_integration(xa, b, f)
+                txt_out.innerText = f"Integral ≈ {integral:.12f}"
+
+            elif m == "composite":
+                b = float(document.getElementById("b-input").value)
+                panels = safe_eval_array(document.getElementById("panels-input").value)[-1]
+                fint_str = document.getElementById("fint-input").value
+                fint = safe_eval_func(fint_str)
+                
+                integral, err = composite_integration(xa, b, panels, f, fint, gauss_integration)
+                txt_out.innerText = f"Gauss Integral (panels={panels}) ≈ {integral:.12f}\nError: {err}"
+
+            elif m == "composite_err":
+                b = float(document.getElementById("b-input").value)
+                panels_arr = safe_eval_array(document.getElementById("panels-input").value)
+                d2_str = document.getElementById("d2-input").value
+                d4_str = document.getElementById("d4-input").value
+                fint_str = document.getElementById("fint-input").value
+                
+                d2 = safe_eval_func(d2_str)
+                d4 = safe_eval_func(d4_str)
+                fint = safe_eval_func(fint_str)
+
+                err_vals, err_bnds, fig = composite_errors(xa, b, panels_arr, f, d2, d4, fint)
+                txt_out.innerText = "Composite errors computed. See plot."
+                display(fig, target="plot-output", append=False)
+
+            elif m == "compute_time":
+                b = float(document.getElementById("b-input").value)
+                vterm = float(document.getElementById("vterm-input").value)
+                hinitial = float(document.getElementById("height-input").value)
+                
+                l_time, niters = compute_time(xa, b, 20, 1e-6, hinitial, vterm)
+                txt_out.innerText = f"Landing Time: {l_time:.6f} seconds\nIterations: {niters}"
+
+        except Exception as e:
+            txt_out.style.color = "var(--error)"
+            txt_out.innerText = f"Error: {str(e)}\n\nCheck your math syntax and array formats."
+            
+  </script>
+</body>
+</html>
