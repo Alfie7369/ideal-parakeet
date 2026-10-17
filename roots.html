@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>Root Solvers | Hawkes House</title>
+  
+  <!-- Load PyScript and specify numpy as a dependency -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+  <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+  <py-config>
+    packages = ["numpy"]
+  </py-config>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --error: #ef4444;
+    }
+    body {
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 650px;
+      width: 100%;
+    }
+    a.back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    a.back-link:hover { color: var(--accent); }
+    .header h1 { font-size: 2.2rem; margin: 0 0 0.5rem 0; }
+    .header h1 span { color: var(--accent); }
+    
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .input-group {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .input-col {
+      flex: 1;
+      min-width: 120px;
+    }
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    input, select {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    
+    button {
+      background-color: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+      margin-top: 0.5rem;
+    }
+    button:hover { opacity: 0.9; }
+    
+    .output-box {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      min-height: 100px;
+      color: var(--accent);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .error-text { color: var(--error); }
+    
+    /* Utility to hide elements cleanly */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Dashboard</a>
+    
+    <div class="header">
+      <h1>Numerical <span>Root Solvers</span></h1>
+      <p style="color: var(--text-muted); margin-top:0;">Interactive Computational Mathematics</p>
+    </div>
+
+    <div class="card">
+      <div class="input-group">
+        <label>Solver Method</label>
+        <select id="method-select" onchange="updateUI()">
+          <option value="bisection">Bisection</option>
+          <option value="bisection_stop">Bisection (with stopping)</option>
+          <option value="fp">Fixed-Point Iteration</option>
+          <option value="fp_stop">Fixed-Point Iteration (with stopping)</option>
+          <option value="newton">Newton's Method</option>
+          <option value="secant">Secant Method</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label id="func-label">Function f(x) (use standard Python math syntax, e.g., x**3 + x**2 - 2*x - 2)</label>
+        <input type="text" id="func-input" value="x**3 + x**2 - 2*x - 2">
+      </div>
+
+      <div class="input-group hidden" id="dfunc-group">
+        <label>Derivative f'(x) (for Newton's method)</label>
+        <input type="text" id="dfunc-input" value="3*x**2 + 2*x - 2">
+      </div>
+      
+      <div class="input-row">
+        <!-- Interval Inputs -->
+        <div class="input-group input-col" id="a-group">
+          <label>Interval Start (a)</label>
+          <input type="number" id="a-input" value="1.0" step="any">
+        </div>
+        <div class="input-group input-col" id="b-group">
+          <label>Interval End (b)</label>
+          <input type="number" id="b-input" value="2.0" step="any">
+        </div>
+        
+        <!-- Guess Inputs -->
+        <div class="input-group input-col hidden" id="p0-group">
+          <label>Initial Guess (p0)</label>
+          <input type="number" id="p0-input" value="1.5" step="any">
+        </div>
+        <div class="input-group input-col hidden" id="p1-group">
+          <label>Second Guess (p1)</label>
+          <input type="number" id="p1-input" value="2.0" step="any">
+        </div>
+
+        <!-- Global Settings -->
+        <div class="input-group input-col">
+          <label>Max Iterations (Nmax)</label>
+          <input type="number" id="nmax-input" value="10">
+        </div>
+        <div class="input-group input-col hidden" id="tol-group">
+          <label>Tolerance (TOL)</label>
+          <input type="number" id="tol-input" value="0.0001" step="any">
+        </div>
+      </div>
+
+      <button id="solve-btn" py-click="run_solver">Calculate</button>
+    </div>
+
+    <div class="card">
+      <label>Computation Results:</label>
+      <div id="output" class="output-box">Waiting for input...</div>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript to dynamically show/hide the correct inputs based on the chosen solver
+    function updateUI() {
+      const method = document.getElementById('method-select').value;
+      
+      // Get DOM elements
+      const funcLabel = document.getElementById('func-label');
+      const dfuncGrp = document.getElementById('dfunc-group');
+      const aGrp = document.getElementById('a-group');
+      const bGrp = document.getElementById('b-group');
+      const p0Grp = document.getElementById('p0-group');
+      const p1Grp = document.getElementById('p1-group');
+      const tolGrp = document.getElementById('tol-group');
+
+      // Reset all to hidden
+      dfuncGrp.classList.add('hidden');
+      aGrp.classList.add('hidden');
+      bGrp.classList.add('hidden');
+      p0Grp.classList.add('hidden');
+      p1Grp.classList.add('hidden');
+      tolGrp.classList.add('hidden');
+
+      // Default function label
+      funcLabel.innerText = "Function f(x) (use Python math syntax)";
+
+      if (method === 'bisection') {
+        aGrp.classList.remove('hidden');
+        bGrp.classList.remove('hidden');
+      } 
+      else if (method === 'bisection_stop') {
+        aGrp.classList.remove('hidden');
+        bGrp.classList.remove('hidden');
+        tolGrp.classList.remove('hidden');
+      }
+      else if (method === 'fp' || method === 'fp_stop') {
+        funcLabel.innerText = "Iteration Function g(x) (where x = g(x))";
+        p0Grp.classList.remove('hidden');
+        if (method === 'fp_stop') tolGrp.classList.remove('hidden');
+      }
+      else if (method === 'newton') {
+        dfuncGrp.classList.remove('hidden');
+        p0Grp.classList.remove('hidden');
+        tolGrp.classList.remove('hidden');
+      }
+      else if (method === 'secant') {
+        p0Grp.classList.remove('hidden');
+        p1Grp.classList.remove('hidden');
+        tolGrp.classList.remove('hidden');
+      }
+    }
+  </script>
+
+  <script type="py">
+    import numpy as np
+    from pyscript import document
+
+    # --- YOUR ORIGINAL SOLVER FUNCTIONS EXACTLY AS WRITTEN ---
+
+    def bisection(f,a,b,Nmax,pe=None):
+        if f(a) * f(b) >= 0:
+            raise ValueError("f(a) and f(b) must have different signs!")
+        p_array = np.zeros(Nmax)    
+        fa=f(a)
+        for n in range(Nmax):
+            p=(a+b)/2  
+            fp=f(p)    
+            if pe is not None:
+                E=np.abs(p-pe)          
+                RE=np.abs(p-pe)/np.abs(pe) 
+                print(f"n {n+1} \t p_n:{p:.8f} \t E_n:{E:.8f} \t RE_n:{RE:.8f} \t -log10(RE_n):{-np.log10(RE):.2f}")     
+            if fp*fa>0:
+                a=p
+                fa=fp
+            else:
+                b=p
+            p_array[n]=p
+        return p_array
+
+    def bisection_with_stopping(f,a,b,Nmax,TOL):
+        p_array = np.zeros(Nmax)
+        fa=f(a)
+        n=1
+        while n <= Nmax:
+            p=(a+b)/2
+            fp=f(p)
+            if (b-a)/2<TOL:
+                p_array[n-1]=p
+                break    
+            p_array[n-1]=p
+            n=n+1        
+            if fa*fp>0:
+                a=p
+                fa=fp
+            else:
+                b=p
+        if n > Nmax:
+            raise RuntimeError("Maximum number of iterations reached without finding root.")
+        return p_array[0:n]
+
+    def FixedPointIteration(g,p0,Nmax):
+        p=p0
+        for n in range(Nmax):
+            p=g(p)
+        return p
+      
+    def FixedPointIteration_with_stopping(g,p0,Nmax, TOL):
+        p_array = np.zeros(Nmax)
+        l = np.zeros(Nmax)
+        x = np.zeros(Nmax)
+        n=1
+        while n<=Nmax:
+            p = g(p0)
+            l[n-1] = p-1
+            x[n-1]=n        
+            if np.abs(p-p0)<TOL:
+                p_array[n-1]=p
+                break
+            p_array[n-1]=p
+            n=n+1
+            p0=p
+        if n > Nmax:
+            raise RuntimeError("Maximum number of iterations reached without achieving the desired TOL.")    
+        return p_array[0:n] ,l[0:n], x[0:n]
+      
+    def Newton_simple(f,df, p0,Nmax,TOL=None):
+        n=0
+        p=np.zeros(Nmax,)
+        while n<Nmax:
+            p0=p0-f(p0)/df(p0) 
+            p[n]=p0 
+            n=n+1 
+            pn=f(p0)
+            if TOL is not None:
+                if np.abs(pn)<TOL:
+                    break
+        return p[0:n]  
+
+    def Secant(f,p0,p1,Nmax,TOL=None):
+        p=np.zeros(Nmax,)
+        n=2
+        q0=f(p0)
+        q1=f(p1)
+        eps=1e-15
+        while n<=Nmax:
+            if q1-q0==0:
+                p=p1-q1*(p1-p0)/(q1-q0+eps)
+            else:
+                p=p1-q1*(p1-p0)/(q1-q0)
+            n=n+1
+            p0=p1
+            q0=q1
+            p1=p
+            q1=f(p)
+        return p 
+
+    # --- PYSCRIPT UI HANDLER ---
+
+    def run_solver(event):
+        output_div = document.getElementById("output")
+        output_div.className = "output-box"
+        output_div.innerText = "Calculating..."
+
+        try:
+            # Capture UI state
+            method = document.getElementById("method-select").value
+            func_str = document.getElementById("func-input").value
+            Nmax = int(document.getElementById("nmax-input").value)
+            
+            # Helper to safely evaluate the user's string as a Python function
+            def eval_func(func_string, x_val):
+                return eval(func_string, {"np": np, "x": x_val})
+
+            def f(x): return eval_func(func_str, x)
+
+            result = None
+
+            # Route to the correct algorithm
+            if method == "bisection":
+                a = float(document.getElementById("a-input").value)
+                b = float(document.getElementById("b-input").value)
+                result = bisection(f, a, b, Nmax)
+                
+            elif method == "bisection_stop":
+                a = float(document.getElementById("a-input").value)
+                b = float(document.getElementById("b-input").value)
+                tol = float(document.getElementById("tol-input").value)
+                result = bisection_with_stopping(f, a, b, Nmax, tol)
+                
+            elif method == "fp":
+                p0 = float(document.getElementById("p0-input").value)
+                result = FixedPointIteration(f, p0, Nmax)
+                
+            elif method == "fp_stop":
+                p0 = float(document.getElementById("p0-input").value)
+                tol = float(document.getElementById("tol-input").value)
+                result = FixedPointIteration_with_stopping(f, p0, Nmax, tol)
+                
+            elif method == "newton":
+                dfunc_str = document.getElementById("dfunc-input").value
+                def df(x): return eval_func(dfunc_str, x)
+                p0 = float(document.getElementById("p0-input").value)
+                tol = float(document.getElementById("tol-input").value)
+                result = Newton_simple(f, df, p0, Nmax, tol)
+                
+            elif method == "secant":
+                p0 = float(document.getElementById("p0-input").value)
+                p1 = float(document.getElementById("p1-input").value)
+                tol = float(document.getElementById("tol-input").value)
+                result = Secant(f, p0, p1, Nmax, tol)
+
+            # Format the output flexibly depending on what the original function returns
+            if isinstance(result, tuple):
+                # FixedPointIteration_with_stopping returns (p_array, l, x)
+                arr = result[0]
+                out_str = "\n".join([f"n={i+1}: {val:.16f}" for i, val in enumerate(arr)])
+                out_str += f"\n\nFinal approximation: {arr[-1]:.16f}"
+            elif isinstance(result, np.ndarray):
+                # Bisection and Newton return arrays
+                out_str = "\n".join([f"n={i+1}: {val:.16f}" for i, val in enumerate(result)])
+                out_str += f"\n\nFinal approximation: {result[-1]:.16f}"
+            else:
+                # Fixed Point and Secant return single floats
+                out_str = f"Final Result: {result:.16f}"
+
+            output_div.innerText = out_str
+
+        except Exception as e:
+            output_div.className = "output-box error-text"
+            output_div.innerText = f"Error: {str(e)}\n\nPlease ensure your inputs are valid."
+  </script>
+
+</body>
+</html>
