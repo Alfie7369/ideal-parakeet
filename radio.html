@@ -325,8 +325,10 @@
     const getProxyUrl = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
     const metadataSources = {
-      'audio-nottingham': { type: 'bbc', url: getProxyUrl('https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest') },
-      'audio-leicester': { type: 'bbc', url: getProxyUrl('https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest') },
+      // Direct BBC fetches (no proxy required)
+      'audio-nottingham': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
+      'audio-leicester': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
+      // Proxied URN fetch
       'audio-urn': { type: 'icecast', url: getProxyUrl('https://live.urn1350.net/status-json.xsl') }
     };
 
