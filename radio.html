@@ -321,11 +321,10 @@
     // --- Metadata Handling ---
     let metaInterval = null;
     
-    // Store the base URLs
     const metadataSources = {
       'audio-nottingham': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
       'audio-leicester': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
-      'audio-urn': { type: 'icecast-proxy', baseUrl: 'https://live.urn1350.net/status-json.xsl' }
+      'audio-urn': { type: 'icecast', baseUrl: 'https://live.urn1350.net/status-json.xsl' }
     };
 
     function updateMetadata(audioId) {
@@ -344,31 +343,28 @@
 
       const fetchMeta = async () => {
         try {
+          // Append cache buster to the target URL to ensure fresh data
           const cacheBuster = new Date().getTime();
-          const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'nocache=' + cacheBuster;
+          const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
+          
+          // Route ALL metadata requests through the reliable AllOrigins wrapper to bypass CORS
+          const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
+          
+          const res = await fetch(proxyUrl, { cache: 'no-store' });
+          const proxyData = await res.json();
+          
+          if (!proxyData.contents) throw new Error("Empty response from proxy");
+          
+          const data = JSON.parse(proxyData.contents);
           
           if (source.type === 'bbc') {
-            // Direct fetch for BBC streams
-            const res = await fetch(targetUrlWithBuster, { cache: 'no-store' });
-            const data = await res.json();
-            
             if (data && data.data && data.data.length > 0 && data.data[0].titles) {
               const track = data.data[0].titles;
               textSpan.textContent = `${track.primary} - ${track.secondary}`;
             } else {
               textSpan.textContent = "Live BBC Broadcast";
             }
-            
-          } else if (source.type === 'icecast-proxy') {
-            // Proxied fetch for URN streams
-            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
-            const res = await fetch(proxyUrl, { cache: 'no-store' });
-            const proxyData = await res.json();
-            
-            if (!proxyData.contents) throw new Error("Empty response from proxy");
-            
-            const data = JSON.parse(proxyData.contents);
-            
+          } else if (source.type === 'icecast') {
             if (data && data.icestats && data.icestats.source) {
               const streamData = data.icestats.source;
               const stream = Array.isArray(streamData) ? streamData[0] : streamData;
