@@ -321,9 +321,9 @@
     // --- Metadata Handling ---
     let metaInterval = null;
     const metadataSources = {
-      'audio-nottingham': { type: 'bbc-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Frms.api.bbc.co.uk%2Fv2%2Fservices%2Fbbc_radio_nottingham%2Fsegments%2Flatest' },
-      'audio-leicester': { type: 'bbc-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Frms.api.bbc.co.uk%2Fv2%2Fservices%2Fbbc_radio_leicester%2Fsegments%2Flatest' },
-      'audio-urn': { type: 'icecast-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Flive.urn1350.net%2Fstatus-json.xsl' }
+      'audio-nottingham': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
+      'audio-leicester': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
+      'audio-urn': { type: 'icecast', url: 'https://corsproxy.io/?https%3A%2F%2Flive.urn1350.net%2Fstatus-json.xsl' }
     };
 
     function updateMetadata(audioId) {
@@ -342,23 +342,17 @@
 
       const fetchMeta = async () => {
         try {
-          // Fetch from the AllOrigins proxy
           const res = await fetch(source.url);
-          const proxyData = await res.json();
+          const data = await res.json();
           
-          if (!proxyData.contents) throw new Error("Empty response from proxy");
-          
-          // Unwrap the JSON data from the proxy's contents (Safely catches HTML errors)
-          const data = JSON.parse(proxyData.contents);
-          
-          if (source.type === 'bbc-proxy') {
+          if (source.type === 'bbc') {
             if (data.data && data.data.length > 0) {
               const track = data.data[0].titles;
               textSpan.textContent = `${track.primary} - ${track.secondary}`;
             } else {
               textSpan.textContent = "Live BBC Broadcast";
             }
-          } else if (source.type === 'icecast-proxy') {
+          } else if (source.type === 'icecast') {
             const stream = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
             if (stream && stream.title) {
               textSpan.textContent = stream.title;
