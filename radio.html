@@ -418,7 +418,7 @@
   </div>
 
   <script>
-    // Setup HLS Streams utilizing direct Akamai manifests
+    // Setup HLS Streams using the exact Gist HLS manifests
     function initHls(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
       if (!audio) return;
@@ -431,14 +431,14 @@
       }
     }
 
-    // Initialize all BBC stations via official HLS manifests
+    // Initialize all BBC stations using verified HLS URLs from the Gist
     initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio1', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio2', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio3', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio4', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8');
-    initHls('audio-worldservice', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio1', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio2', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio3', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio4', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_four_fm/bbc_radio_four_fm.isml/bbc_radio_four_fm-audio%3d96000.norewind.m3u8');
+    initHls('audio-worldservice', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8');
 
     // --- Metadata Handling ---
     let metaInterval = null;
