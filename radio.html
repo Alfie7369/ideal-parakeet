@@ -74,8 +74,18 @@
     .station:hover {
       border-color: var(--accent);
     }
+    .station-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .station-details-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .station-details h3 {
-      margin: 0 0 0.25rem 0;
+      margin: 0;
       font-size: 1.05rem;
       color: var(--text-main);
       font-weight: 600;
@@ -90,6 +100,39 @@
       padding: 0.15rem 0.5rem;
       border-radius: 20px;
       border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    /* Now Playing Display */
+    .now-playing {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .now-playing-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    /* Mini EQ Animation */
+    .mini-eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 10px;
+    }
+    .mini-eq .bar {
+      width: 2px;
+      background-color: var(--accent);
+      animation: eq 0.8s ease-in-out infinite alternate;
+    }
+    .mini-eq .bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
+    .mini-eq .bar:nth-child(2) { height: 100%; animation-delay: 0.4s; }
+    .mini-eq .bar:nth-child(3) { height: 40%; animation-delay: 0.2s; }
+    @keyframes eq {
+      0% { height: 2px; }
+      100% { height: 10px; }
     }
     
     .player-controls {
@@ -140,8 +183,16 @@
     <!-- Station 1: Nottingham -->
     <div class="station">
       <div class="station-details">
-        <h3>BBC Radio Nottingham</h3>
-        <span class="live-badge">Live Stream</span>
+        <div class="station-details-header">
+          <h3>BBC Radio Nottingham</h3>
+          <span class="live-badge">Live Stream</span>
+        </div>
+        <div class="now-playing" id="np-audio-nottingham">
+          <div class="now-playing-content">
+            <div class="mini-eq"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="track-text">Connecting...</span>
+          </div>
+        </div>
       </div>
       <div class="player-controls">
         <button class="play-btn" onclick="togglePlay('audio-nottingham', this)">
@@ -155,8 +206,16 @@
     <!-- Station 2: Leicester -->
     <div class="station">
       <div class="station-details">
-        <h3>BBC Radio Leicester</h3>
-        <span class="live-badge">Live Stream</span>
+        <div class="station-details-header">
+          <h3>BBC Radio Leicester</h3>
+          <span class="live-badge">Live Stream</span>
+        </div>
+        <div class="now-playing" id="np-audio-leicester">
+          <div class="now-playing-content">
+            <div class="mini-eq"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="track-text">Connecting...</span>
+          </div>
+        </div>
       </div>
       <div class="player-controls">
         <button class="play-btn" onclick="togglePlay('audio-leicester', this)">
@@ -170,8 +229,16 @@
     <!-- Station 3: Classic FM -->
     <div class="station">
       <div class="station-details">
-        <h3>Classic FM</h3>
-        <span class="live-badge">Live Stream</span>
+        <div class="station-details-header">
+          <h3>Classic FM</h3>
+          <span class="live-badge">Live Stream</span>
+        </div>
+        <div class="now-playing" id="np-audio-classic">
+          <div class="now-playing-content">
+            <div class="mini-eq"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="track-text">Live Broadcast</span>
+          </div>
+        </div>
       </div>
       <div class="player-controls">
         <button class="play-btn" onclick="togglePlay('audio-classic', this)">
@@ -187,8 +254,16 @@
     <!-- Station 4: URN -->
     <div class="station">
       <div class="station-details">
-        <h3>University Radio Nottingham (URN)</h3>
-        <span class="live-badge">Live Stream</span>
+        <div class="station-details-header">
+          <h3>University Radio Nottingham (URN)</h3>
+          <span class="live-badge">Live Stream</span>
+        </div>
+        <div class="now-playing" id="np-audio-urn">
+          <div class="now-playing-content">
+            <div class="mini-eq"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="track-text">Connecting...</span>
+          </div>
+        </div>
       </div>
       <div class="player-controls">
         <button class="play-btn" onclick="togglePlay('audio-urn', this)">
@@ -204,8 +279,16 @@
     <!-- Station 5: Fosse 107 -->
     <div class="station">
       <div class="station-details">
-        <h3>Fosse 107</h3>
-        <span class="live-badge">Live Stream</span>
+        <div class="station-details-header">
+          <h3>Fosse 107</h3>
+          <span class="live-badge">Live Stream</span>
+        </div>
+        <div class="now-playing" id="np-audio-fosse">
+          <div class="now-playing-content">
+            <div class="mini-eq"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="track-text">Live Broadcast</span>
+          </div>
+        </div>
       </div>
       <div class="player-controls">
         <button class="play-btn" onclick="togglePlay('audio-fosse', this)">
@@ -235,20 +318,78 @@
     initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
 
+    // --- Metadata Handling ---
+    let metaInterval = null;
+    const metadataSources = {
+      'audio-nottingham': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
+      'audio-leicester': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
+      'audio-urn': { type: 'icecast', url: 'https://live.urn1350.net/status-json.xsl' }
+    };
+
+    function updateMetadata(audioId) {
+      if (metaInterval) clearInterval(metaInterval);
+      
+      const source = metadataSources[audioId];
+      const npElement = document.getElementById('np-' + audioId);
+      if (!npElement) return;
+      
+      const textSpan = npElement.querySelector('.track-text');
+
+      if (!source) {
+        textSpan.textContent = "Live Broadcast";
+        return;
+      }
+
+      const fetchMeta = async () => {
+        try {
+          const res = await fetch(source.url);
+          const data = await res.json();
+          
+          if (source.type === 'bbc') {
+            if (data.data && data.data.length > 0) {
+              const track = data.data[0].titles;
+              textSpan.textContent = `${track.primary} - ${track.secondary}`;
+            } else {
+              textSpan.textContent = "Live BBC Broadcast";
+            }
+          } else if (source.type === 'icecast') {
+            const stream = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
+            if (stream && stream.title) {
+              textSpan.textContent = stream.title;
+            } else {
+              textSpan.textContent = "Live URN Broadcast";
+            }
+          }
+        } catch (e) {
+          console.error("Meta fetch error:", e);
+          textSpan.textContent = "Live Broadcast";
+        }
+      };
+
+      fetchMeta();
+      metaInterval = setInterval(fetchMeta, 15000); // Poll every 15 seconds
+    }
+
     // Custom Play/Pause Handler
     function togglePlay(audioId, btn) {
       const audio = document.getElementById(audioId);
       const playIcon = btn.querySelector('.icon-play');
       const pauseIcon = btn.querySelector('.icon-pause');
+      const nowPlayingDiv = document.getElementById('np-' + audioId);
 
       // Stop all other streams when playing a new one
       document.querySelectorAll('audio').forEach(a => {
         if (a.id !== audioId && !a.paused) {
           a.pause();
           const otherBtn = a.parentElement.querySelector('.play-btn');
+          const otherNp = document.getElementById('np-' + a.id);
+          
           if (otherBtn) {
             otherBtn.querySelector('.icon-play').style.display = 'block';
             otherBtn.querySelector('.icon-pause').style.display = 'none';
+          }
+          if (otherNp) {
+            otherNp.style.display = 'none';
           }
         }
       });
@@ -257,17 +398,26 @@
         audio.play().then(() => {
           playIcon.style.display = 'none';
           pauseIcon.style.display = 'block';
+          if (nowPlayingDiv) {
+            nowPlayingDiv.style.display = 'block';
+            nowPlayingDiv.querySelector('.track-text').textContent = "Connecting...";
+            updateMetadata(audioId);
+          }
         }).catch(err => console.log("Playback error:", err));
       } else {
         audio.pause();
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
+        if (nowPlayingDiv) nowPlayingDiv.style.display = 'none';
+        if (metaInterval) clearInterval(metaInterval);
       }
 
       // Reset button if stream ends or stops
       audio.onended = () => {
         playIcon.style.display = 'block';
         pauseIcon.style.display = 'none';
+        if (nowPlayingDiv) nowPlayingDiv.style.display = 'none';
+        if (metaInterval) clearInterval(metaInterval);
       };
     }
   </script>
