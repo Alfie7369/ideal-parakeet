@@ -320,10 +320,12 @@
 
     // --- Metadata Handling ---
     let metaInterval = null;
+    
+    // Store the base URLs so we can append cache-busters dynamically
     const metadataSources = {
-      'audio-nottingham': { type: 'bbc-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Frms.api.bbc.co.uk%2Fv2%2Fservices%2Fbbc_radio_nottingham%2Fsegments%2Flatest' },
-      'audio-leicester': { type: 'bbc-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Frms.api.bbc.co.uk%2Fv2%2Fservices%2Fbbc_radio_leicester%2Fsegments%2Flatest' },
-      'audio-urn': { type: 'icecast-proxy', url: 'https://api.allorigins.win/get?url=https%3A%2F%2Flive.urn1350.net%2Fstatus-json.xsl' }
+      'audio-nottingham': { type: 'bbc-proxy', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
+      'audio-leicester': { type: 'bbc-proxy', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
+      'audio-urn': { type: 'icecast-proxy', baseUrl: 'https://live.urn1350.net/status-json.xsl' }
     };
 
     function updateMetadata(audioId) {
@@ -342,7 +344,12 @@
 
       const fetchMeta = async () => {
         try {
-          const res = await fetch(source.url);
+          // Add a constantly changing timestamp to bypass proxy & browser caching
+          const cacheBuster = new Date().getTime();
+          const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'nocache=' + cacheBuster;
+          const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
+          
+          const res = await fetch(proxyUrl, { cache: 'no-store' });
           const proxyData = await res.json();
           
           if (!proxyData.contents) throw new Error("Empty response from proxy");
@@ -350,7 +357,6 @@
           const data = JSON.parse(proxyData.contents);
           
           if (source.type === 'bbc-proxy') {
-            // Check that the data array exists and has titles attached
             if (data && data.data && data.data.length > 0 && data.data[0].titles) {
               const track = data.data[0].titles;
               textSpan.textContent = `${track.primary} - ${track.secondary}`;
@@ -358,7 +364,6 @@
               textSpan.textContent = "Live BBC Broadcast";
             }
           } else if (source.type === 'icecast-proxy') {
-            // Check that icestats and the nested source object actually exist
             if (data && data.icestats && data.icestats.source) {
               const streamData = data.icestats.source;
               const stream = Array.isArray(streamData) ? streamData[0] : streamData;
