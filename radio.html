@@ -320,10 +320,14 @@
 
     // --- Metadata Handling ---
     let metaInterval = null;
+    
+    // Safely encode URLs for the proxy
+    const getProxyUrl = (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
     const metadataSources = {
-      'audio-nottingham': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
-      'audio-leicester': { type: 'bbc', url: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
-      'audio-urn': { type: 'icecast', url: 'https://corsproxy.io/?https%3A%2F%2Flive.urn1350.net%2Fstatus-json.xsl' }
+      'audio-nottingham': { type: 'bbc', url: getProxyUrl('https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest') },
+      'audio-leicester': { type: 'bbc', url: getProxyUrl('https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest') },
+      'audio-urn': { type: 'icecast', url: getProxyUrl('https://live.urn1350.net/status-json.xsl') }
     };
 
     function updateMetadata(audioId) {
@@ -346,16 +350,22 @@
           const data = await res.json();
           
           if (source.type === 'bbc') {
-            if (data.data && data.data.length > 0) {
+            // Null-check every level of the BBC JSON structure
+            if (data && data.data && data.data.length > 0 && data.data[0].titles) {
               const track = data.data[0].titles;
               textSpan.textContent = `${track.primary} - ${track.secondary}`;
             } else {
               textSpan.textContent = "Live BBC Broadcast";
             }
           } else if (source.type === 'icecast') {
-            const stream = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
-            if (stream && stream.title) {
-              textSpan.textContent = stream.title;
+            // Null-check every level of the URN JSON structure
+            if (data && data.icestats && data.icestats.source) {
+              const stream = Array.isArray(data.icestats.source) ? data.icestats.source[0] : data.icestats.source;
+              if (stream && stream.title) {
+                textSpan.textContent = stream.title;
+              } else {
+                textSpan.textContent = "Live URN Broadcast";
+              }
             } else {
               textSpan.textContent = "Live URN Broadcast";
             }
