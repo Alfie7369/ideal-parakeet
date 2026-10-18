@@ -205,6 +205,9 @@
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
 
+    // Utility to pause execution and prevent API rate-limiting
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     async function fetchLiveScores() {
       const container = document.getElementById('scoreboard-container');
 
@@ -221,6 +224,12 @@
         });
         
         const data = await response.json();
+        
+        if (data.errors && Object.keys(data.errors).length > 0) {
+          console.error("API Error (Fixtures):", data.errors);
+          if (data.errors.requests) throw new Error("Daily API limit reached.");
+        }
+
         const allFixtures = data.response || [];
         
         const localMatches = allFixtures.filter(match => 
@@ -280,12 +289,12 @@
 
       } catch (error) {
         console.error("Score Error:", error);
+        container.innerHTML = `<div class="loading" style="color: var(--live-red);">Error loading fixtures. Check console.</div>`;
       }
     }
 
-    // Cached League Table Fetcher using explicit LEAGUE IDs
     async function fetchLeagueTable(leagueId, leagueName) {
-      const cacheKey = `standings_v2_league_${leagueId}_${currentSeason}`;
+      const cacheKey = `standings_v3_league_${leagueId}_${currentSeason}`;
       const cacheTime = localStorage.getItem(cacheKey + '_time');
       const now = new Date().getTime();
 
@@ -299,13 +308,19 @@
             headers: { 'x-apisports-key': API_KEY }
           });
           const data = await res.json();
+          
+          if (data.errors && Object.keys(data.errors).length > 0) {
+            console.error(`API Error for ${leagueName}:`, data.errors);
+            return { name: leagueName, table: null };
+          }
+
           if (data.response && data.response.length > 0) {
             standingsData = data.response[0].league.standings[0];
             localStorage.setItem(cacheKey, JSON.stringify(standingsData));
             localStorage.setItem(cacheKey + '_time', now.toString());
           }
         } catch (err) {
-          console.error("Table Error:", err);
+          console.error(`Network Error fetching ${leagueName}:`, err);
         }
       }
       return { name: leagueName, table: standingsData };
@@ -316,9 +331,11 @@
 
       const container = document.getElementById('tables-container');
       
-      // League 39 = Premier League | League 41 = League One | League 42 = League Two
+      // Fetch sequentially with a 1-second delay to bypass free-tier burst limits
       const plData = await fetchLeagueTable(39, "Premier League");
+      await sleep(1000); 
       const l1Data = await fetchLeagueTable(41, "League One");
+      await sleep(1000);
       const l2Data = await fetchLeagueTable(42, "League Two");
 
       container.innerHTML = '';
@@ -368,7 +385,7 @@
 
     fetchLiveScores();
     loadTables();
-    setInterval(fetchLiveScores, 900000); 
+    setInterval(fetchLiveScores, 900000);
   </script>
 </body>
 </html>
