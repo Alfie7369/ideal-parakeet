@@ -29,7 +29,7 @@
       box-sizing: border-box;
     }
     .container {
-      max-width: 1200px; /* Widened slightly to accommodate 3 tables beautifully */
+      max-width: 1200px;
       width: 100%;
     }
     a.back-link {
@@ -130,7 +130,6 @@
     /* League Tables Section */
     .tables-grid {
       display: grid;
-      /* Auto-fit dynamically wraps the tables into 1, 2, or 3 columns depending on screen size */
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2rem;
       padding: 1.5rem;
@@ -151,7 +150,6 @@
     .tracked-row td { background-color: rgba(56, 189, 248, 0.05); font-weight: 600; }
 
     .loading { padding: 3rem; text-align: center; color: var(--text-muted); }
-    .api-warning { padding: 2rem; text-align: center; color: var(--warning); border-bottom: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -161,11 +159,10 @@
     
     <div class="header">
       <h1>Match Day <span>Scoreboard</span></h1>
-      <p style="color: var(--text-muted); margin-top:0;">Live API-Football Fixtures & Tables</p>
+      <p style="color: var(--text-muted); margin-top:0;">Live ESPN Fixtures & Tables</p>
     </div>
 
     <div class="dashboard-grid">
-      <!-- Live Fixtures -->
       <div class="card">
         <div class="card-header">Today's Fixtures</div>
         <div id="scoreboard-container">
@@ -173,7 +170,6 @@
         </div>
       </div>
 
-      <!-- Standings Tables -->
       <div class="card">
         <div class="card-header">League Standings</div>
         <div class="tables-grid" id="tables-container">
@@ -184,159 +180,143 @@
   </div>
 
   <script>
-    // --- PASTE YOUR API-FOOTBALL KEY HERE ---
-    const API_KEY = 'bc7cd898dabe901bd62777d9a0df3485'; 
-    
-    // Name Matching logic (filters out U21 and Women's squads safely)
-    const TRACKED_TEAMS = ['Aston Villa', 'Nottingham Forest', 'Leicester', 'Notts County'];
-    const EXCLUDE_TERMS = [' W', ' U21', ' U18', ' U23', ' Women'];
+    const TRACKED_TEAMS = ['Aston Villa', 'Nottingham Forest', 'Leicester City', 'Notts County'];
 
     function isTrackedTeam(teamName) {
-      const isMatch = TRACKED_TEAMS.some(t => teamName.includes(t));
-      const isExcluded = EXCLUDE_TERMS.some(e => teamName.includes(e));
-      return isMatch && !isExcluded;
+      return TRACKED_TEAMS.some(t => teamName.includes(t));
     }
-
-    const d = new Date();
-    const currentSeason = d.getMonth() < 6 ? d.getFullYear() - 1 : d.getFullYear();
 
     function formatTime(isoString) {
       const date = new Date(isoString);
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Utility to pause execution and prevent API rate-limiting
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    // --- ESPN Data Fetchers ---
+    // Fetch live scores from ESPN's hidden scoreboard endpoints
+    async function fetchESPNScoreboard(leagueCode) {
+      try {
+        const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/scoreboard`);
+        const data = await response.json();
+        return data.events || [];
+      } catch (error) {
+        console.error(`Error fetching scores for ${leagueCode}:`, error);
+        return [];
+      }
+    }
 
-    async function fetchLiveScores() {
+    async function updateScores() {
       const container = document.getElementById('scoreboard-container');
+      
+      // Fetch Premier League (eng.1), League One (eng.3), and League Two (eng.4)
+      const [pl, l1, l2] = await Promise.all([
+        fetchESPNScoreboard('eng.1'),
+        fetchESPNScoreboard('eng.3'),
+        fetchESPNScoreboard('eng.4')
+      ]);
 
-      if (API_KEY === 'YOUR_API_KEY_HERE') {
-        container.innerHTML = `<div class="api-warning">Please enter your free api-sports.io key in the script to activate live scoring.</div>`;
+      const allMatches = [...pl, ...l1, ...l2];
+      
+      const localMatches = allMatches.filter(event => {
+        const homeTeam = event.competitions[0].competitors.find(c => c.homeAway === 'home').team.name;
+        const awayTeam = event.competitions[0].competitors.find(c => c.homeAway === 'away').team.name;
+        return isTrackedTeam(homeTeam) || isTrackedTeam(awayTeam);
+      });
+
+      if (localMatches.length === 0) {
+        container.innerHTML = `<div class="loading">No tracked fixtures scheduled for today.</div>`;
         return;
       }
 
+      container.innerHTML = '';
+      localMatches.forEach(event => {
+        const row = document.createElement('div');
+        row.className = 'match-row';
+        
+        const competition = event.competitions[0];
+        const homeCompetitor = competition.competitors.find(c => c.homeAway === 'home');
+        const awayCompetitor = competition.competitors.find(c => c.homeAway === 'away');
+        
+        const homeTeam = homeCompetitor.team.name;
+        const awayTeam = awayCompetitor.team.name;
+        const venue = competition.venue ? competition.venue.fullName : 'TBA';
+        const statusDetails = event.status.type;
+        
+        let state = 'scheduled';
+        if (statusDetails.state === 'in') state = 'live';
+        if (statusDetails.state === 'post') state = 'finished';
+
+        let statusHtml = state === 'live' 
+          ? `<div class="status status-live"><div class="pulse-dot"></div> ${event.status.displayClock}'</div>`
+          : state === 'finished' 
+            ? `<div class="status status-ft">FT</div>`
+            : `<div class="status status-pending">Today</div>`;
+
+        let scoreHtml = state === 'scheduled'
+          ? `<div class="score-scheduled">${formatTime(event.date)}</div>`
+          : `<div class="score-numbers">${homeCompetitor.score} - ${awayCompetitor.score}</div>`;
+
+        let homeClass = 'team-name';
+        if (homeTeam.includes('Aston Villa')) homeClass += ' highlight-villa';
+        else if (isTrackedTeam(homeTeam)) homeClass += ' highlight';
+        
+        let awayClass = 'team-name';
+        if (awayTeam.includes('Aston Villa')) awayClass += ' highlight-villa';
+        else if (isTrackedTeam(awayTeam)) awayClass += ' highlight';
+
+        row.innerHTML = `
+          ${statusHtml}
+          <div class="team-col home">
+            <div class="${homeClass}">${homeTeam}</div>
+            <div class="venue-name">${venue}</div>
+          </div>
+          <div class="score-container">${scoreHtml}</div>
+          <div class="team-col away">
+            <div class="${awayClass}">${awayTeam}</div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Fetch league tables from ESPN's hidden standings endpoint
+    async function fetchESPNStandings(leagueCode, leagueName) {
       try {
-        const dateStr = d.toISOString().split('T')[0];
-        const response = await fetch(`https://v3.football.api-sports.io/fixtures?date=${dateStr}`, {
-          method: 'GET',
-          headers: { 'x-apisports-key': API_KEY }
-        });
+        const res = await fetch(`https://site.web.api.espn.com/apis/v2/sports/soccer/${leagueCode}/standings?level=3`);
+        const data = await res.json();
         
-        const data = await response.json();
+        // ESPN stores the standings array deeply nested
+        const standingsArr = data.children[0].standings.entries;
         
-        if (data.errors && Object.keys(data.errors).length > 0) {
-          console.error("API Error (Fixtures):", data.errors);
-          if (data.errors.requests) throw new Error("Daily API limit reached.");
-        }
-
-        const allFixtures = data.response || [];
-        
-        const localMatches = allFixtures.filter(match => 
-          isTrackedTeam(match.teams.home.name) || isTrackedTeam(match.teams.away.name)
-        );
-
-        if (localMatches.length === 0) {
-          container.innerHTML = `<div class="loading">No tracked fixtures scheduled for today.</div>`;
-          return;
-        }
-
-        container.innerHTML = '';
-        localMatches.forEach(match => {
-          const row = document.createElement('div');
-          row.className = 'match-row';
-
-          const homeTeam = match.teams.home.name;
-          const awayTeam = match.teams.away.name;
-          const statusShort = match.fixture.status.short;
-          const venue = match.fixture.venue.name || 'TBA';
+        // Extract relevant data
+        const table = standingsArr.map(entry => {
+          const stats = entry.stats;
+          const played = stats.find(s => s.name === 'gamesPlayed').displayValue;
+          const gd = stats.find(s => s.name === 'pointDifferential').displayValue;
+          const pts = stats.find(s => s.name === 'points').displayValue;
+          const rank = stats.find(s => s.name === 'rank').displayValue;
           
-          let state = 'scheduled';
-          if (['1H', 'HT', '2H', 'ET', 'P', 'LIVE'].includes(statusShort)) state = 'live';
-          if (['FT', 'AET', 'PEN'].includes(statusShort)) state = 'finished';
-
-          let statusHtml = state === 'live' 
-            ? `<div class="status status-live"><div class="pulse-dot"></div> ${match.fixture.status.elapsed}'</div>`
-            : state === 'finished' 
-              ? `<div class="status status-ft">FT</div>`
-              : `<div class="status status-pending">Today</div>`;
-
-          let scoreHtml = state === 'scheduled'
-            ? `<div class="score-scheduled">${formatTime(match.fixture.date)}</div>`
-            : `<div class="score-numbers">${match.goals.home ?? 0} - ${match.goals.away ?? 0}</div>`;
-
-          let homeClass = 'team-name';
-          if (homeTeam.includes('Aston Villa')) homeClass += ' highlight-villa';
-          else if (isTrackedTeam(homeTeam)) homeClass += ' highlight';
-          
-          let awayClass = 'team-name';
-          if (awayTeam.includes('Aston Villa')) awayClass += ' highlight-villa';
-          else if (isTrackedTeam(awayTeam)) awayClass += ' highlight';
-
-          row.innerHTML = `
-            ${statusHtml}
-            <div class="team-col home">
-              <div class="${homeClass}">${homeTeam}</div>
-              <div class="venue-name">${venue}</div>
-            </div>
-            <div class="score-container">${scoreHtml}</div>
-            <div class="team-col away">
-              <div class="${awayClass}">${awayTeam}</div>
-            </div>
-          `;
-          container.appendChild(row);
+          return {
+            rank: rank,
+            teamName: entry.team.name,
+            played: played,
+            gd: gd,
+            pts: pts
+          };
         });
 
-      } catch (error) {
-        console.error("Score Error:", error);
-        container.innerHTML = `<div class="loading" style="color: var(--live-red);">Error loading fixtures. Check console.</div>`;
+        return { name: leagueName, table: table };
+      } catch (err) {
+        console.error(`Error fetching standings for ${leagueName}:`, err);
+        return { name: leagueName, table: null };
       }
     }
 
-    async function fetchLeagueTable(leagueId, leagueName) {
-      const cacheKey = `standings_v3_league_${leagueId}_${currentSeason}`;
-      const cacheTime = localStorage.getItem(cacheKey + '_time');
-      const now = new Date().getTime();
-
-      let standingsData = null;
-
-      if (cacheTime && (now - parseInt(cacheTime) < 43200000)) {
-        standingsData = JSON.parse(localStorage.getItem(cacheKey));
-      } else {
-        try {
-          const res = await fetch(`https://v3.football.api-sports.io/standings?season=${currentSeason}&league=${leagueId}`, {
-            headers: { 'x-apisports-key': API_KEY }
-          });
-          const data = await res.json();
-          
-          if (data.errors && Object.keys(data.errors).length > 0) {
-            console.error(`API Error for ${leagueName}:`, data.errors);
-            return { name: leagueName, table: null };
-          }
-
-          if (data.response && data.response.length > 0) {
-            standingsData = data.response[0].league.standings[0];
-            localStorage.setItem(cacheKey, JSON.stringify(standingsData));
-            localStorage.setItem(cacheKey + '_time', now.toString());
-          }
-        } catch (err) {
-          console.error(`Network Error fetching ${leagueName}:`, err);
-        }
-      }
-      return { name: leagueName, table: standingsData };
-    }
-
-    async function loadTables() {
-      if (API_KEY === 'YOUR_API_KEY_HERE') return;
-
+    async function updateTables() {
       const container = document.getElementById('tables-container');
       
-      // Fetch sequentially with a 1-second delay to bypass free-tier burst limits
-      const plData = await fetchLeagueTable(39, "Premier League");
-      await sleep(1000); 
-      const l1Data = await fetchLeagueTable(41, "League One");
-      await sleep(1000);
-      const l2Data = await fetchLeagueTable(42, "League Two");
+      const plData = await fetchESPNStandings('eng.1', "Premier League");
+      const l1Data = await fetchESPNStandings('eng.3', "League One");
+      const l2Data = await fetchESPNStandings('eng.4', "League Two");
 
       container.innerHTML = '';
       
@@ -351,14 +331,14 @@
 
         let rowsHtml = '';
         league.table.forEach(teamData => {
-          const isTracked = isTrackedTeam(teamData.team.name);
+          const isTracked = isTrackedTeam(teamData.teamName);
           rowsHtml += `
             <tr class="${isTracked ? 'tracked-row' : ''}">
               <td class="table-pos">${teamData.rank}</td>
-              <td>${teamData.team.name}</td>
-              <td>${teamData.all.played}</td>
-              <td>${teamData.goalsDiff}</td>
-              <td class="table-pts">${teamData.points}</td>
+              <td>${teamData.teamName}</td>
+              <td>${teamData.played}</td>
+              <td>${teamData.gd}</td>
+              <td class="table-pts">${teamData.pts}</td>
             </tr>
           `;
         });
@@ -383,9 +363,14 @@
       });
     }
 
-    fetchLiveScores();
-    loadTables();
-    setInterval(fetchLiveScores, 900000);
+    // Initialize Dashboard
+    updateScores();
+    updateTables();
+    
+    // Refresh scores every 60 seconds (since it's a free, high-limit endpoint)
+    setInterval(updateScores, 60000); 
+    // Refresh tables every hour
+    setInterval(updateTables, 3600000);
   </script>
 </body>
 </html>
