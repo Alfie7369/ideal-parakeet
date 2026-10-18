@@ -418,7 +418,7 @@
   </div>
 
   <script>
-    // Setup HLS Streams using the exact Gist HLS manifests
+    // Setup HLS Streams
     function initHls(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
       if (!audio) return;
@@ -431,7 +431,7 @@
       }
     }
 
-    // Initialize all BBC stations using verified HLS URLs from the Gist
+    // Initialize all BBC stations using verified HLS URLs
     initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
     initHls('audio-radio1', 'https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8');
