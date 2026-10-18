@@ -13,8 +13,8 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
-      --warning: #f59e0b;
-      --danger: #ef4444;
+      --pop-blue: #60a5fa;
+      --uv-warn: #fbbf24;
     }
     body {
       font-family: ui-sans-serif, system-ui, sans-serif;
@@ -27,12 +27,10 @@
       align-items: center;
       min-height: 100vh;
       box-sizing: border-box;
-      overflow-x: hidden;
     }
     .container {
-      max-width: 950px;
+      max-width: 900px;
       width: 100%;
-      box-sizing: border-box;
     }
     a.back-link {
       color: var(--text-muted);
@@ -46,182 +44,84 @@
     .header h1 { font-size: 2.2rem; margin: 0 0 0.5rem 0; }
     .header h1 span { color: var(--accent); }
     
-    .weather-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      width: 100%;
-    }
-    
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      box-sizing: border-box;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .card h2 {
-      margin: 0 0 1rem 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-    
-    /* Current Weather Layout */
-    .current-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      padding: 1.5rem;
       margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    .main-info-group {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-    }
-    .temp-display {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
-      margin-top: 0.25rem;
-    }
-    .conditions {
-      font-size: 1.35rem;
-      font-weight: 500;
-    }
-    .location-info {
-      text-align: right;
-    }
-    .location-title {
-      font-weight: 600;
-      font-size: 1.15rem;
-    }
-    .location-sub {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: 0.2rem;
-    }
-
-    .weather-details {
-      display: flex;
-      gap: 3rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--border);
-    }
-    .detail-item {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .detail-item span {
-      display: block;
-      color: var(--text-main);
+    .card-header {
       font-size: 1.1rem;
       font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    /* Current Conditions Grid */
+    .current-grid {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .current-main {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .current-icon svg {
+      width: 64px;
+      height: 64px;
+      stroke: var(--accent);
+    }
+    .current-temp {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .current-desc {
+      color: var(--text-muted);
+      font-size: 1.1rem;
       margin-top: 0.25rem;
     }
-
-    /* Hourly Forecast */
-    .hourly-container {
-      display: flex;
-      gap: 0.75rem;
-      overflow-x: auto;
-      padding-bottom: 0.75rem;
-      scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
-      width: 100%;
-      box-sizing: border-box;
+    .current-location {
+      text-align: right;
     }
-    .hourly-item {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.85rem 0.6rem;
-      text-align: center;
-      min-width: 72px;
-      flex-shrink: 0;
+    .current-location h2 { margin: 0; font-size: 1.25rem; }
+    .current-location p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Extended Metrics Bar */
+    .metrics-bar {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .metric {
       display: flex;
       flex-direction: column;
+      gap: 0.25rem;
+    }
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .metric-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
       align-items: center;
       gap: 0.5rem;
-      box-sizing: border-box;
     }
-    .hourly-time {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-    .hourly-temp {
-      font-weight: 600;
-      font-size: 1rem;
-      color: var(--text-main);
-    }
-
-    /* 7-Day Forecast Grid */
-    .forecast-container {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.75rem;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    @media (max-width: 768px) {
-      .forecast-container {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-      }
-      .weather-details {
-        gap: 1.5rem;
-      }
-    }
-    .forecast-day {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.85rem 0.5rem;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.4rem;
-      box-sizing: border-box;
-    }
-    .forecast-day h4 {
-      margin: 0;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-    .forecast-condition {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-align: center;
-      min-height: 2em;
-      display: flex;
-      align-items: center;
-    }
-    .forecast-temp {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .forecast-temp span {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      font-weight: normal;
-    }
-
-    /* SVG Icons */
-    .weather-icon-lg {
-      width: 44px;
-      height: 44px;
-      stroke: var(--accent);
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    .weather-icon-sm {
+    
+    /* Custom Horizon Icon */
+    .horizon-icon {
       width: 24px;
       height: 24px;
       stroke: var(--accent);
@@ -231,7 +131,71 @@
       stroke-linejoin: round;
     }
 
-    .loading { text-align: center; color: var(--text-muted); padding: 2rem; }
+    /* Hourly Forecast */
+    .hourly-container {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .hourly-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      background: rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.5rem;
+      gap: 0.5rem;
+    }
+    .hourly-time { font-size: 0.85rem; color: var(--text-muted); }
+    .hourly-icon svg { width: 24px; height: 24px; stroke: var(--text-main); }
+    .hourly-temp { font-weight: 600; font-size: 1.1rem; }
+    .hourly-pop { 
+      font-size: 0.75rem; 
+      color: var(--pop-blue); 
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* 7-Day Outlook */
+    .daily-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 1rem;
+    }
+    .daily-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 0.5rem;
+      gap: 0.5rem;
+    }
+    .daily-day { font-weight: 600; font-size: 0.95rem; }
+    .daily-icon svg { width: 28px; height: 28px; stroke: var(--text-main); }
+    .daily-desc { font-size: 0.75rem; color: var(--text-muted); text-align: center; }
+    .daily-temps {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+    .temp-min { color: var(--text-muted); font-weight: normal; }
+
+    .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .current-grid { flex-direction: column; gap: 1.5rem; }
+      .current-location { text-align: left; }
+      .metrics-bar { gap: 1.5rem; justify-content: space-between; }
+    }
   </style>
 </head>
 <body>
@@ -244,192 +208,199 @@
       <p style="color: var(--text-muted); margin-top:0;">Live Open-Meteo Meteorological Data</p>
     </div>
 
-    <div class="weather-grid">
-      <!-- Current Conditions Card -->
-      <div class="card" id="current-card">
-        <div class="loading">Loading current weather conditions...</div>
-      </div>
-
-      <!-- Hourly Forecast Card -->
-      <div class="card">
-        <h2>Hourly Forecast (Next 24 Hours)</h2>
-        <div class="hourly-container" id="hourly-container">
-          <div class="loading">Loading hourly data...</div>
-        </div>
-      </div>
-
-      <!-- 7-Day Forecast Card -->
-      <div class="card">
-        <h2>7-Day Outlook</h2>
-        <div class="forecast-container" id="forecast-container">
-          <div class="loading">Loading forecast data...</div>
-        </div>
-      </div>
+    <div id="weather-dashboard">
+      <div class="loading">Fetching local telemetry...</div>
     </div>
   </div>
 
   <script>
-    function getWeatherInfo(code) {
-      switch (code) {
-        case 0:
-          return {
-            desc: "Clear sky",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
-          };
-        case 1:
-        case 2:
-          return {
-            desc: "Partly cloudy",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path></svg>`
-          };
-        case 3:
-          return {
-            desc: "Overcast",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`
-          };
-        case 45:
-        case 48:
-          return {
-            desc: "Foggy",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><line x1="3" y1="10" x2="21" y2="10"></line><line x1="5" y1="14" x2="19" y2="14"></line><line x1="7" y1="6" x2="17" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><line x1="3" y1="10" x2="21" y2="10"></line><line x1="5" y1="14" x2="19" y2="14"></line><line x1="7" y1="6" x2="17" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`
-          };
-        case 51:
-        case 53:
-        case 55:
-        case 61:
-        case 63:
-        case 80:
-        case 81:
-          return {
-            desc: "Rain showers",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"></path><line x1="8" y1="19" x2="8" y2="21"></line><line x1="12" y1="19" x2="12" y2="21"></line><line x1="16" y1="19" x2="16" y2="21"></line></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"></path><line x1="8" y1="19" x2="8" y2="21"></line><line x1="12" y1="19" x2="12" y2="21"></line><line x1="16" y1="19" x2="16" y2="21"></line></svg>`
-          };
-        case 65:
-        case 82:
-          return {
-            desc: "Heavy rain",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"></path><line x1="6" y1="18" x2="5" y2="22"></line><line x1="10" y1="18" x2="9" y2="22"></line><line x1="14" y1="18" x2="13" y2="22"></line><line x1="18" y1="18" x2="17" y2="22"></line></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"></path><line x1="6" y1="18" x2="5" y2="22"></line><line x1="10" y1="18" x2="9" y2="22"></line><line x1="14" y1="18" x2="13" y2="22"></line><line x1="18" y1="18" x2="17" y2="22"></line></svg>`
-          };
-        case 95:
-        case 96:
-        case 99:
-          return {
-            desc: "Thunderstorm",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path><polyline points="13 11 9 17 15 17 11 23"></polyline></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path><polyline points="13 11 9 17 15 17 11 23"></polyline></svg>`
-          };
-        default:
-          return {
-            desc: "Variable",
-            iconLg: `<svg class="weather-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
-            iconSm: `<svg class="weather-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`
-          };
-      }
+    // WMO Weather interpretation codes mapping to SVG icons
+    const weatherCodes = {
+      0: { desc: "Clear sky", icon: '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>' },
+      1: { desc: "Mainly clear", icon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>' },
+      2: { desc: "Partly cloudy", icon: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>' },
+      3: { desc: "Overcast", icon: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>' },
+      45: { desc: "Fog", icon: '<line x1="4" y1="14" x2="20" y2="14"/><line x1="8" y1="18" x2="20" y2="18"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="6" x2="20" y2="6"/>' },
+      48: { desc: "Depositing rime fog", icon: '<line x1="4" y1="14" x2="20" y2="14"/><line x1="8" y1="18" x2="20" y2="18"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="6" x2="20" y2="6"/>' },
+      51: { desc: "Light drizzle", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      53: { desc: "Moderate drizzle", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      55: { desc: "Dense drizzle", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      61: { desc: "Slight rain", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      63: { desc: "Moderate rain", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      65: { desc: "Heavy rain", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      71: { desc: "Slight snow", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      73: { desc: "Moderate snow", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      75: { desc: "Heavy snow", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      77: { desc: "Snow grains", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      80: { desc: "Slight rain showers", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      81: { desc: "Moderate rain showers", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      82: { desc: "Violent rain showers", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      85: { desc: "Slight snow showers", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      86: { desc: "Heavy snow showers", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>' },
+      95: { desc: "Thunderstorm", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' },
+      96: { desc: "Thunderstorm with slight hail", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' },
+      99: { desc: "Thunderstorm with heavy hail", icon: '<path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>' },
+    };
+
+    function getIconSvg(code) {
+      const data = weatherCodes[code] || weatherCodes[0];
+      return `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${data.icon}</svg>`;
     }
 
-    function formatDayName(dateString) {
-      const options = { weekday: 'short' };
-      return new Date(dateString).toLocaleDateString('en-GB', options);
+    function getDesc(code) {
+      return (weatherCodes[code] || weatherCodes[0]).desc;
     }
 
-    function formatHour(isoString) {
+    function formatTime(isoString) {
       const date = new Date(isoString);
-      return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
 
-    async function fetchNottinghamWeather() {
-      try {
-        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=52.9548&longitude=-1.1581&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FLondon');
-        const data = await response.json();
+    function getDayName(isoString, isToday) {
+      if (isToday) return "Today";
+      const date = new Date(isoString);
+      return date.toLocaleDateString('en-GB', { weekday: 'short' });
+    }
 
-        // 1. Current Weather
+    async function fetchWeather() {
+      try {
+        // Updated API call adding sunrise, sunset, uv_index_max, and precipitation_probability
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=52.9536&longitude=-1.1505&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=Europe%2FLondon');
+        const data = await res.json();
+
         const current = data.current;
-        const currentInfo = getWeatherInfo(current.weather_code);
+        const daily = data.daily;
+        const hourly = data.hourly;
         
-        document.getElementById('current-card').innerHTML = `
-          <div class="current-header">
-            <div class="main-info-group">
-              ${currentInfo.iconLg}
-              <div>
-                <div class="conditions">${currentInfo.desc}</div>
-                <div class="temp-display">${Math.round(current.temperature_2m)}°C</div>
-                <div style="color: var(--text-muted); margin-top: 0.35rem; font-size: 0.9rem;">
-                  Feels like ${Math.round(current.apparent_temperature)}°C
+        // Extract daylight and UV data for today (index 0)
+        const sunriseTime = formatTime(daily.sunrise[0]);
+        const sunsetTime = formatTime(daily.sunset[0]);
+        const uvMax = daily.uv_index_max[0];
+        
+        let uvColor = "var(--text-main)";
+        if (uvMax > 5) uvColor = "var(--uv-warn)";
+
+        // 1. Current Conditions HTML
+        let html = `
+          <div class="card">
+            <div class="current-grid">
+              <div class="current-main">
+                <div class="current-icon">${getIconSvg(current.weather_code)}</div>
+                <div>
+                  <div class="current-temp">${Math.round(current.temperature_2m)}°C</div>
+                  <div class="current-desc">
+                    <span style="font-weight:600;">${getDesc(current.weather_code)}</span> &nbsp;|&nbsp; Feels like ${Math.round(current.apparent_temperature)}°C
+                  </div>
+                </div>
+              </div>
+              <div class="current-location">
+                <h2>Nottingham</h2>
+                <p>East Midlands, UK</p>
+              </div>
+            </div>
+            
+            <div class="metrics-bar">
+              <div class="metric">
+                <div class="metric-label">Wind Speed</div>
+                <div class="metric-value">${current.wind_speed_10m} km/h</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Humidity</div>
+                <div class="metric-value">${current.relative_humidity_2m}%</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Max UV Index</div>
+                <div class="metric-value" style="color: ${uvColor};">${uvMax}</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Daylight</div>
+                <div class="metric-value">
+                  <svg class="horizon-icon" viewBox="0 0 24 24">
+                    <path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>
+                  </svg>
+                  ${sunriseTime} - ${sunsetTime}
                 </div>
               </div>
             </div>
-            <div class="location-info">
-              <div class="location-title">Nottingham</div>
-              <div class="location-sub">East Midlands, UK</div>
-            </div>
-          </div>
-          <div class="weather-details">
-            <div class="detail-item">Wind Speed <span>${current.wind_speed_10m} km/h</span></div>
-            <div class="detail-item">Humidity <span>${current.relative_humidity_2m}%</span></div>
           </div>
         `;
 
-        // 2. Hourly Forecast (Next 24 Hours)
-        const hourly = data.hourly;
-        const hourlyContainer = document.getElementById('hourly-container');
-        hourlyContainer.innerHTML = '';
-
+        // 2. Hourly Forecast HTML (Find current hour index)
         const now = new Date();
-        const nowIndex = hourly.time.findIndex(t => new Date(t) >= now) || 0;
-        const endIndex = Math.min(nowIndex + 24, hourly.time.length);
+        const currentHourIso = now.toISOString().slice(0, 14) + "00";
+        let startIndex = hourly.time.findIndex(t => t.startsWith(currentHourIso.slice(0, 13)));
+        if (startIndex === -1) startIndex = 0; // fallback
 
-        for (let i = nowIndex; i < endIndex; i++) {
-          const hourTime = formatHour(hourly.time[i]);
+        html += `
+          <div class="card">
+            <div class="card-header">Hourly Forecast (Next 24 Hours)</div>
+            <div class="hourly-container">
+        `;
+
+        for (let i = startIndex; i < startIndex + 24; i++) {
+          if (i >= hourly.time.length) break;
+          const time = formatTime(hourly.time[i]);
           const temp = Math.round(hourly.temperature_2m[i]);
-          const hourInfo = getWeatherInfo(hourly.weather_code[i]);
+          const code = hourly.weather_code[i];
+          const pop = hourly.precipitation_probability[i];
+          
+          let popHtml = '';
+          if (pop > 0) {
+            popHtml = `
+              <div class="hourly-pop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px; height:10px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                ${pop}%
+              </div>
+            `;
+          } else {
+            popHtml = `<div class="hourly-pop" style="color: transparent;">0%</div>`; // Placeholder for alignment
+          }
 
-          const hourCard = document.createElement('div');
-          hourCard.className = 'hourly-item';
-          hourCard.innerHTML = `
-            <div class="hourly-time">${hourTime}</div>
-            <div>${hourInfo.iconSm}</div>
-            <div class="hourly-temp">${temp}°C</div>
+          html += `
+            <div class="hourly-item">
+              <div class="hourly-time">${time}</div>
+              <div class="hourly-icon">${getIconSvg(code)}</div>
+              <div class="hourly-temp">${temp}°C</div>
+              ${popHtml}
+            </div>
           `;
-          hourlyContainer.appendChild(hourCard);
         }
+        html += `</div></div>`;
 
-        // 3. 7-Day Forecast (7 clean columns)
-        const daily = data.daily;
-        const forecastContainer = document.getElementById('forecast-container');
-        forecastContainer.innerHTML = '';
+        // 3. 7-Day Outlook HTML
+        html += `
+          <div class="card">
+            <div class="card-header">7-Day Outlook</div>
+            <div class="daily-grid">
+        `;
 
-        for (let i = 0; i < Math.min(7, daily.time.length); i++) {
-          const dayName = i === 0 ? 'Today' : formatDayName(daily.time[i]);
-          const maxTemp = Math.round(daily.temperature_2m_max[i]);
-          const minTemp = Math.round(daily.temperature_2m_min[i]);
-          const dayInfo = getWeatherInfo(daily.weather_code[i]);
+        for (let i = 0; i < daily.time.length; i++) {
+          const dayName = getDayName(daily.time[i], i === 0);
+          const maxT = Math.round(daily.temperature_2m_max[i]);
+          const minT = Math.round(daily.temperature_2m_min[i]);
+          const code = daily.weather_code[i];
 
-          const dayCard = document.createElement('div');
-          dayCard.className = 'forecast-day';
-          dayCard.innerHTML = `
-            <h4>${dayName}</h4>
-            <div>${dayInfo.iconSm}</div>
-            <div class="forecast-condition">${dayInfo.desc}</div>
-            <div class="forecast-temp">${maxTemp}° <span>/ ${minTemp}°</span></div>
+          html += `
+            <div class="daily-item">
+              <div class="daily-day">${dayName}</div>
+              <div class="daily-icon">${getIconSvg(code)}</div>
+              <div class="daily-desc">${getDesc(code)}</div>
+              <div class="daily-temps">${maxT}° <span class="temp-min">/ ${minT}°</span></div>
+            </div>
           `;
-          forecastContainer.appendChild(dayCard);
         }
+        html += `</div></div>`;
 
-      } catch (error) {
-        console.error("Failed to load weather data:", error);
-        document.getElementById('current-card').innerHTML = '<div class="loading" style="color: var(--danger);">Failed to retrieve weather feed.</div>';
+        document.getElementById('weather-dashboard').innerHTML = html;
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('weather-dashboard').innerHTML = `<div class="loading" style="color: #ef4444;">Failed to fetch meteorological data.</div>`;
       }
     }
 
-    fetchNottinghamWeather();
-    setInterval(fetchNottinghamWeather, 600000);
+    fetchWeather();
+    setInterval(fetchWeather, 900000); // Refresh every 15 minutes
   </script>
-
 </body>
 </html>
