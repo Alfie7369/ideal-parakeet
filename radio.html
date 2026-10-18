@@ -246,9 +246,7 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
       </div>
-      <audio id="audio-radio1" preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" type="audio/mpeg">
-      </audio>
+      <audio id="audio-radio1" preload="none"></audio>
     </div>
 
     <!-- Station: BBC Radio 2 -->
@@ -271,9 +269,7 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
       </div>
-      <audio id="audio-radio2" preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two" type="audio/mpeg">
-      </audio>
+      <audio id="audio-radio2" preload="none"></audio>
     </div>
 
     <!-- Station: BBC Radio 3 -->
@@ -296,9 +292,7 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
       </div>
-      <audio id="audio-radio3" preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three" type="audio/mpeg">
-      </audio>
+      <audio id="audio-radio3" preload="none"></audio>
     </div>
 
     <!-- Station: BBC Radio 4 -->
@@ -321,9 +315,7 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
       </div>
-      <audio id="audio-radio4" preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm" type="audio/mpeg">
-      </audio>
+      <audio id="audio-radio4" preload="none"></audio>
     </div>
 
     <!-- Station: BBC World Service -->
@@ -346,9 +338,7 @@
           <svg class="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
       </div>
-      <audio id="audio-worldservice" preload="none">
-        <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" type="audio/mpeg">
-      </audio>
+      <audio id="audio-worldservice" preload="none"></audio>
     </div>
 
     <!-- Station: Classic FM -->
@@ -428,7 +418,7 @@
   </div>
 
   <script>
-    // Setup HLS Streams for BBC Nottingham and Leicester only
+    // Setup HLS Streams utilizing official BBC Akamai networks
     function initHls(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
       if (!audio) return;
@@ -441,14 +431,21 @@
       }
     }
 
-    // Keep the known-working HLS streams for the local stations
+    // Locals
     initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
     initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
+
+    // Nationals
+    initHls('audio-radio1', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio2', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio3', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8');
+    initHls('audio-radio4', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8');
+    initHls('audio-worldservice', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8');
 
     // --- Metadata Handling ---
     let metaInterval = null;
     
-    // API Sources for metadata
+    // Base API Sources
     const metadataSources = {
       'audio-nottingham': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
       'audio-leicester': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
@@ -476,19 +473,18 @@
 
       const fetchMeta = async () => {
         try {
-          // Append cache buster
+          // Append cache buster to ensure live updates
           const cacheBuster = new Date().getTime();
           const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
           
-          // Route through the reliable AllOrigins wrapper to bypass CORS
-          const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
+          // Switch to CodeTabs Proxy: Much more reliable, bypasses CORS, returns raw JSON directly
+          const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrlWithBuster);
           
           const res = await fetch(proxyUrl, { cache: 'no-store' });
-          const proxyData = await res.json();
+          if (!res.ok) throw new Error("Proxy error");
           
-          if (!proxyData.contents) throw new Error("Empty response from proxy");
-          
-          const data = JSON.parse(proxyData.contents);
+          // No need to unwrap '.contents', CodeTabs gives us the raw JSON
+          const data = await res.json();
           
           if (source.type === 'bbc') {
             if (data && data.data && data.data.length > 0 && data.data[0].titles) {
