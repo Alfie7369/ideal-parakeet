@@ -264,16 +264,26 @@
         const awayTeam = awayCompetitor.team.name;
         const venue = competition.venue ? competition.venue.fullName : 'TBA';
         const statusDetails = event.status.type;
-        
+
         let state = 'scheduled';
         if (statusDetails.state === 'in') state = 'live';
         if (statusDetails.state === 'post') state = 'finished';
+
+        // Check if the match is actually today
+        const matchDate = new Date(event.date);
+        const today = new Date();
+        const isToday = matchDate.toDateString() === today.toDateString();
+        
+        // Format as "Today" or "Tue 20 Oct"
+        const pendingLabel = isToday 
+          ? 'Today' 
+          : matchDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
         let statusHtml = state === 'live' 
           ? `<div class="status status-live"><div class="pulse-dot"></div> ${event.status.displayClock}'</div>`
           : state === 'finished' 
             ? `<div class="status status-ft">FT</div>`
-            : `<div class="status status-pending">Today</div>`;
+            : `<div class="status status-pending">${pendingLabel}</div>`;
 
         let scoreHtml = state === 'scheduled'
           ? `<div class="score-scheduled">${formatTime(event.date)}</div>`
