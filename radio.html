@@ -418,7 +418,7 @@
   </div>
 
   <script>
-    // Setup HLS Streams utilizing official BBC Akamai networks
+    // Setup HLS Streams utilizing the lsn.lv Gist router
     function initHls(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
       if (!audio) return;
@@ -431,21 +431,19 @@
       }
     }
 
-    // Locals
-    initHls('audio-nottingham', 'https://as-hls-uk-live.akamaized.net/pool_96088503/live/uk/bbc_radio_nottingham/bbc_radio_nottingham.isml/bbc_radio_nottingham-audio%3d96000.norewind.m3u8');
-    initHls('audio-leicester', 'https://as-hls-uk-live.akamaized.net/pool_04542919/live/uk/bbc_radio_leicester/bbc_radio_leicester.isml/bbc_radio_leicester-audio%3d96000.norewind.m3u8');
-
-    // Nationals
-    initHls('audio-radio1', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio2', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio3', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8');
-    initHls('audio-radio4', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8');
-    initHls('audio-worldservice', 'https://as-hls-uk-live.akamaized.net/pool_90492164/live/uk/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8');
+    // Initialize all BBC stations using the lsn.lv HLS router from the Gist
+    initHls('audio-nottingham', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_nottingham&bitrate=96000');
+    initHls('audio-leicester', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leicester&bitrate=96000');
+    initHls('audio-radio1', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=96000');
+    initHls('audio-radio2', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=96000');
+    initHls('audio-radio3', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_three&bitrate=96000');
+    initHls('audio-radio4', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_fourfm&bitrate=96000');
+    initHls('audio-worldservice', 'https://lsn.lv/bbcradio.m3u8?station=bbc_world_service&bitrate=96000');
 
     // --- Metadata Handling ---
     let metaInterval = null;
     
-    // Base API Sources
+    // Base API Sources for track info
     const metadataSources = {
       'audio-nottingham': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_nottingham/segments/latest' },
       'audio-leicester': { type: 'bbc', baseUrl: 'https://rms.api.bbc.co.uk/v2/services/bbc_radio_leicester/segments/latest' },
@@ -473,11 +471,9 @@
 
       const fetchMeta = async () => {
         try {
-          // Append cache buster
           const cacheBuster = new Date().getTime();
           const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
           
-          // Revert to AllOrigins /get wrapper (Successfully tested to bypass CORB blocks)
           const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
           
           const res = await fetch(proxyUrl, { cache: 'no-store' });
