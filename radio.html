@@ -418,7 +418,7 @@
   </div>
 
   <script>
-    // Setup HLS Streams utilizing the lsn.lv Gist router
+    // Setup HLS Streams utilizing the lstn.lv robust stream resolvers
     function initHls(elementId, streamUrl) {
       const audio = document.getElementById(elementId);
       if (!audio) return;
@@ -431,14 +431,14 @@
       }
     }
 
-    // Initialize all BBC stations using the lsn.lv HLS router from the Gist
-    initHls('audio-nottingham', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_nottingham&bitrate=96000');
-    initHls('audio-leicester', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leicester&bitrate=96000');
-    initHls('audio-radio1', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=96000');
-    initHls('audio-radio2', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=96000');
-    initHls('audio-radio3', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_three&bitrate=96000');
-    initHls('audio-radio4', 'https://lsn.lv/bbcradio.m3u8?station=bbc_radio_fourfm&bitrate=96000');
-    initHls('audio-worldservice', 'https://lsn.lv/bbcradio.m3u8?station=bbc_world_service&bitrate=96000');
+    // Initialize all BBC stations using the stable lstn.lv HLS router URLs
+    initHls('audio-nottingham', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_nottingham&bitrate=320000&uk=1');
+    initHls('audio-leicester', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_leicester&bitrate=320000&uk=1');
+    initHls('audio-radio1', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=320000&uk=1');
+    initHls('audio-radio2', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=320000&uk=1');
+    initHls('audio-radio3', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_three&bitrate=320000&uk=1');
+    initHls('audio-radio4', 'https://lstn.lv/bbcradio.m3u8?station=bbc_radio_fourfm&bitrate=320000&uk=1');
+    initHls('audio-worldservice', 'https://lstn.lv/bbcradio.m3u8?station=bbc_world_service&bitrate=320000&uk=1');
 
     // --- Metadata Handling ---
     let metaInterval = null;
