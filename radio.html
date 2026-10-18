@@ -473,18 +473,19 @@
 
       const fetchMeta = async () => {
         try {
-          // Append cache buster to ensure live updates
+          // Append cache buster
           const cacheBuster = new Date().getTime();
           const targetUrlWithBuster = source.baseUrl + (source.baseUrl.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
           
-          // Switch to CodeTabs Proxy: Much more reliable, bypasses CORS, returns raw JSON directly
-          const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrlWithBuster);
+          // Revert to AllOrigins /get wrapper (Successfully tested to bypass CORB blocks)
+          const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrlWithBuster);
           
           const res = await fetch(proxyUrl, { cache: 'no-store' });
-          if (!res.ok) throw new Error("Proxy error");
+          const proxyData = await res.json();
           
-          // No need to unwrap '.contents', CodeTabs gives us the raw JSON
-          const data = await res.json();
+          if (!proxyData.contents) throw new Error("Empty response from proxy");
+          
+          const data = JSON.parse(proxyData.contents);
           
           if (source.type === 'bbc') {
             if (data && data.data && data.data.length > 0 && data.data[0].titles) {
