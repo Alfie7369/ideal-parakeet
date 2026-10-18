@@ -29,7 +29,7 @@
       box-sizing: border-box;
     }
     .container {
-      max-width: 950px;
+      max-width: 1200px; /* Widened slightly to accommodate 3 tables beautifully */
       width: 100%;
     }
     a.back-link {
@@ -130,11 +130,11 @@
     /* League Tables Section */
     .tables-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      /* Auto-fit dynamically wraps the tables into 1, 2, or 3 columns depending on screen size */
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2rem;
       padding: 1.5rem;
     }
-    @media (max-width: 800px) { .tables-grid { grid-template-columns: 1fr; } }
     
     .league-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
     .league-table th {
@@ -187,10 +187,16 @@
     // --- PASTE YOUR API-FOOTBALL KEY HERE ---
     const API_KEY = 'bc7cd898dabe901bd62777d9a0df3485'; 
     
-    // Exact Team IDs (42: Aston Villa, 46: Leicester, 65: Nott Forest, 1318: Notts County)
-    const TRACKED_IDS = [42, 46, 65, 1318];
+    // Name Matching logic (filters out U21 and Women's squads safely)
+    const TRACKED_TEAMS = ['Aston Villa', 'Nottingham Forest', 'Leicester', 'Notts County'];
+    const EXCLUDE_TERMS = [' W', ' U21', ' U18', ' U23', ' Women'];
 
-    // Get current football season year (resets in July)
+    function isTrackedTeam(teamName) {
+      const isMatch = TRACKED_TEAMS.some(t => teamName.includes(t));
+      const isExcluded = EXCLUDE_TERMS.some(e => teamName.includes(e));
+      return isMatch && !isExcluded;
+    }
+
     const d = new Date();
     const currentSeason = d.getMonth() < 6 ? d.getFullYear() - 1 : d.getFullYear();
 
@@ -217,9 +223,8 @@
         const data = await response.json();
         const allFixtures = data.response || [];
         
-        // Filter using exact IDs to exclude Women's and U21 teams
         const localMatches = allFixtures.filter(match => 
-          TRACKED_IDS.includes(match.teams.home.id) || TRACKED_IDS.includes(match.teams.away.id)
+          isTrackedTeam(match.teams.home.name) || isTrackedTeam(match.teams.away.name)
         );
 
         if (localMatches.length === 0) {
@@ -232,8 +237,8 @@
           const row = document.createElement('div');
           row.className = 'match-row';
 
-          const homeTeam = match.teams.home;
-          const awayTeam = match.teams.away;
+          const homeTeam = match.teams.home.name;
+          const awayTeam = match.teams.away.name;
           const statusShort = match.fixture.status.short;
           const venue = match.fixture.venue.name || 'TBA';
           
@@ -252,22 +257,22 @@
             : `<div class="score-numbers">${match.goals.home ?? 0} - ${match.goals.away ?? 0}</div>`;
 
           let homeClass = 'team-name';
-          if (homeTeam.id === 42) homeClass += ' highlight-villa';
-          else if (TRACKED_IDS.includes(homeTeam.id)) homeClass += ' highlight';
+          if (homeTeam.includes('Aston Villa')) homeClass += ' highlight-villa';
+          else if (isTrackedTeam(homeTeam)) homeClass += ' highlight';
           
           let awayClass = 'team-name';
-          if (awayTeam.id === 42) awayClass += ' highlight-villa';
-          else if (TRACKED_IDS.includes(awayTeam.id)) awayClass += ' highlight';
+          if (awayTeam.includes('Aston Villa')) awayClass += ' highlight-villa';
+          else if (isTrackedTeam(awayTeam)) awayClass += ' highlight';
 
           row.innerHTML = `
             ${statusHtml}
             <div class="team-col home">
-              <div class="${homeClass}">${homeTeam.name}</div>
+              <div class="${homeClass}">${homeTeam}</div>
               <div class="venue-name">${venue}</div>
             </div>
             <div class="score-container">${scoreHtml}</div>
             <div class="team-col away">
-              <div class="${awayClass}">${awayTeam.name}</div>
+              <div class="${awayClass}">${awayTeam}</div>
             </div>
           `;
           container.appendChild(row);
@@ -278,20 +283,19 @@
       }
     }
 
-    // Cached League Table Fetcher
-    async function fetchLeagueTable(teamId, leagueName) {
-      const cacheKey = `standings_${teamId}_${currentSeason}`;
+    // Cached League Table Fetcher using explicit LEAGUE IDs
+    async function fetchLeagueTable(leagueId, leagueName) {
+      const cacheKey = `standings_v2_league_${leagueId}_${currentSeason}`;
       const cacheTime = localStorage.getItem(cacheKey + '_time');
       const now = new Date().getTime();
 
       let standingsData = null;
 
-      // Use cache if it is less than 12 hours old (43200000 ms)
       if (cacheTime && (now - parseInt(cacheTime) < 43200000)) {
         standingsData = JSON.parse(localStorage.getItem(cacheKey));
       } else {
         try {
-          const res = await fetch(`https://v3.football.api-sports.io/standings?season=${currentSeason}&team=${teamId}`, {
+          const res = await fetch(`https://v3.football.api-sports.io/standings?season=${currentSeason}&league=${leagueId}`, {
             headers: { 'x-apisports-key': API_KEY }
           });
           const data = await res.json();
@@ -312,17 +316,25 @@
 
       const container = document.getElementById('tables-container');
       
-      // Fetch Premier League (via Villa ID: 42) and League Two (via Notts County ID: 1318)
-      const plData = await fetchLeagueTable(42, "Premier League");
-      const l2Data = await fetchLeagueTable(1318, "League Two");
+      // League 39 = Premier League | League 41 = League One | League 42 = League Two
+      const plData = await fetchLeagueTable(39, "Premier League");
+      const l1Data = await fetchLeagueTable(41, "League One");
+      const l2Data = await fetchLeagueTable(42, "League Two");
 
       container.innerHTML = '';
-      [plData, l2Data].forEach(league => {
-        if (!league.table) return;
+      
+      [plData, l1Data, l2Data].forEach(league => {
+        if (!league.table) {
+          const errorMsg = document.createElement('div');
+          errorMsg.className = "loading";
+          errorMsg.textContent = `${league.name} data not currently available.`;
+          container.appendChild(errorMsg);
+          return;
+        }
 
         let rowsHtml = '';
         league.table.forEach(teamData => {
-          const isTracked = TRACKED_IDS.includes(teamData.team.id);
+          const isTracked = isTrackedTeam(teamData.team.name);
           rowsHtml += `
             <tr class="${isTracked ? 'tracked-row' : ''}">
               <td class="table-pos">${teamData.rank}</td>
@@ -336,7 +348,7 @@
 
         const tableWrapper = document.createElement('div');
         tableWrapper.innerHTML = `
-          <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; color: var(--text-muted);">${league.name}</h3>
+          <h3 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 1.05rem; color: var(--text-muted);">${league.name}</h3>
           <table class="league-table">
             <thead>
               <tr>
@@ -356,8 +368,6 @@
 
     fetchLiveScores();
     loadTables();
-    
-    // Refresh live scores every 15 mins. Tables only refresh if the 12-hour cache expires.
     setInterval(fetchLiveScores, 900000); 
   </script>
 </body>
