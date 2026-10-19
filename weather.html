@@ -485,8 +485,16 @@
 
         // Hourly Forecast HTML
         const now = new Date();
-        const currentHourIso = now.toISOString().slice(0, 14) + "00";
-        let startIndex = hourly.time.findIndex(t => t.startsWith(currentHourIso.slice(0, 13)));
+        
+        // Build a local time string (YYYY-MM-DDTHH:00) to perfectly match the API's local timezone
+        const localHourIso = now.getFullYear() + '-' + 
+          String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(now.getDate()).padStart(2, '0') + 'T' + 
+          String(now.getHours()).padStart(2, '0') + ':00';
+          
+        let startIndex = hourly.time.findIndex(t => t === localHourIso);
+        
+        // Fallback to the current hour if not found, or cap it so we don't run out of array bounds
         if (startIndex === -1) startIndex = 0;
 
         html += `
