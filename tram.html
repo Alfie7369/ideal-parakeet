@@ -347,8 +347,8 @@
                   
                   const atcoCode = placeData.member[0].atcocode;
                   
-                  // 2. Fetch the live scheduled departures for that platform
-                  const depRes = await fetch(`https://transportapi.com/v3/uk/tram/stop/${atcoCode}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}&group=no`);
+                  // 2. Fetch live departures via the bus endpoint for trams
+                  const depRes = await fetch(`https://transportapi.com/v3/uk/bus/stop/${atcoCode}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}&group=no`);
                   const depData = await depRes.json();
                   
                   let departures = [];
@@ -371,8 +371,8 @@
                   
                   // 3. Build the departure rows
                   let rowsHTML = departures.map(d => {
-                    const dest = d.destination;
-                    const timeStr = d.expected_departure_time || d.aimed_departure_time;
+                    const dest = d.destination || d.direction || "Tram";
+                    const timeStr = d.expected_departure_time || d.aimed_departure_time || d.best_departure_estimate;
                     
                     let routeColor = "var(--accent)";
                     if (dest.includes("Toton") || dest.includes("Hucknall")) routeColor = "var(--green-line)";
