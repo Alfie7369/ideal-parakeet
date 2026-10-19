@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Corrected street-level coordinates for Uni West Gate and Victoria Centre
+    // Restored the exact, original NaPTAN coordinates for Milton Street & Woodside Road
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9333, lon: -1.1997, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9330, lon: -1.2001, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9562, lon: -1.1453, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9564, lon: -1.1450, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9332, lon: -1.1982, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9328, lon: -1.1989, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9565, lon: -1.1465, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9568, lon: -1.1461, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
@@ -248,10 +248,7 @@
             const res = await fetch(`https://nctx.crudworks.workers.dev/?stopId=${stop.code}`);
             if (!res.ok) throw new Error("Worker returned status: " + res.status);
             
-            // Parse the parent object first
             const data = await res.json();
-            
-            // Extract the 'departures' array from inside the object
             const departures = data.departures || [];
 
             if (departures.length === 0) {
@@ -267,14 +264,12 @@
               return;
             }
 
-            // Map the rows natively using the exact keys shown in your worker payload
             let rowsHTML = departures.slice(0, 5).map(d => {
               const route = d.routeNumber || "Bus";
               const dest = d.destination || "City Centre";
               
               let displayTime = d.expected || `${d.expectedMins} min`;
               
-              // Handle "Due" and clean up formatting
               if (d.expectedMins <= 0) {
                 displayTime = "Due";
               } else {
