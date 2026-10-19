@@ -16,7 +16,6 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
-      --bus-green: #22c55e;
       --bus-orange: #f97316;
     }
     
@@ -181,7 +180,7 @@
       flex-shrink: 0;
     }
     .dep-time.due {
-      color: var(--bus-green);
+      color: var(--bus-orange);
       animation: pulse 2s infinite;
     }
     @keyframes pulse {
@@ -221,7 +220,6 @@
       maxZoom: 19
     }).addTo(map);
 
-    // All stops configured with the requested orange styling
     const busStops = [
       { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93292, lon: -1.19830, color: "var(--bus-orange)" },
       { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93262, lon: -1.19885, color: "var(--bus-orange)" },
@@ -245,12 +243,16 @@
         marker.on('popupopen', async (e) => {
           const popup = e.popup;
           try {
-            const res = await fetch(`https://nctx.arcticapi.com/network/stops/${stop.code}/visits`);
+            // Encode the official NCT URL
+            const targetUrl = encodeURIComponent(`https://nctx.arcticapi.com/network/stops/${stop.code}/visits`);
+            
+            // Fetch via AllOrigins to bypass strict CORS policies preventing browser access
+            const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
+            
             if (!res.ok) throw new Error("API returned status: " + res.status);
             
             const data = await res.json();
             
-            // Defensively target the correct nested array from the ArcticAPI JSON structure
             let departures = [];
             if (data && data._embedded && Array.isArray(data._embedded.visits)) {
               departures = data._embedded.visits;
@@ -265,14 +267,13 @@
                   <p class="schedule-subtitle">Live Departures</p>
                 </div>
                 <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                  No live departures returned by API.
+                  No live departures currently returned by API.
                 </div>
               `);
               return;
             }
 
             let rowsHTML = departures.slice(0, 5).map(d => {
-              // Extract Route Number
               let route = "Bus";
               if (d._links && d._links["transmodel:line"] && d._links["transmodel:line"].name) {
                 route = d._links["transmodel:line"].name;
@@ -280,10 +281,8 @@
                 route = d.lineName;
               }
               
-              // Extract Destination
               const dest = d.destinationName || "City Centre";
               
-              // Extract native display string directly instead of running Date math
               let displayTime = d.displayTime || d.departureDisplayTime || "Due";
               displayTime = displayTime.replace('mins', 'min').replace('min', 'min'); 
               if (displayTime.toLowerCase() === 'due') displayTime = 'Due';
@@ -310,15 +309,15 @@
             `);
 
           } catch (err) {
-            console.error("ArcticAPI Error:", err);
+            console.error("CORS Proxy / API Error:", err);
             popup.setContent(`
               <div class="schedule-header" style="border-top-color: ${stop.color};">
                 <p class="schedule-title">${stop.name}</p>
                 <p class="schedule-subtitle">Live Departures</p>
               </div>
               <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                Unable to retrieve network data.<br>
-                <small style="opacity:0.4; font-size:0.75rem;">Check console for errors.</small>
+                Unable to fetch data due to network block.<br>
+                <small style="opacity:0.4; font-size:0.75rem;">Check developer console.</small>
               </div>
             `);
           }
