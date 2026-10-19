@@ -18,7 +18,6 @@
       --border: #334155;
       --bus-green: #22c55e;
       --bus-orange: #f97316;
-      --bus-purple: #a855f7;
     }
     
     body {
@@ -222,11 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
+    // All stops configured with the requested orange styling
     const busStops = [
       { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93292, lon: -1.19830, color: "var(--bus-orange)" },
       { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93262, lon: -1.19885, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.95665, lon: -1.14652, color: "var(--bus-purple)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.95690, lon: -1.14612, color: "var(--bus-purple)" }
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.95665, lon: -1.14652, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.95690, lon: -1.14612, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
@@ -250,10 +250,12 @@
             
             const data = await res.json();
             
-            // Extract the departures array from the _embedded object
+            // Defensively target the correct nested array from the ArcticAPI JSON structure
             let departures = [];
             if (data && data._embedded && Array.isArray(data._embedded.visits)) {
               departures = data._embedded.visits;
+            } else if (data && Array.isArray(data.visits)) {
+              departures = data.visits;
             }
 
             if (departures.length === 0) {
@@ -270,24 +272,21 @@
             }
 
             let rowsHTML = departures.slice(0, 5).map(d => {
-              // Extract the nested line name from _links
+              // Extract Route Number
               let route = "Bus";
               if (d._links && d._links["transmodel:line"] && d._links["transmodel:line"].name) {
                 route = d._links["transmodel:line"].name;
+              } else if (d.lineName) {
+                route = d.lineName;
               }
               
+              // Extract Destination
               const dest = d.destinationName || "City Centre";
-              const expectedTime = d.expectedDepartureTime || d.aimedDepartureTime;
-
-              // Calculate minutes remaining
-              let displayTime = "Due";
-              if (expectedTime) {
-                const depTime = new Date(expectedTime);
-                const diffMins = Math.round((depTime - new Date()) / 60000);
-                displayTime = diffMins <= 1 ? "Due" : `${Math.max(0, diffMins)} min`;
-              } else if (d.displayTime) {
-                displayTime = d.displayTime.replace('mins', 'min');
-              }
+              
+              // Extract native display string directly instead of running Date math
+              let displayTime = d.displayTime || d.departureDisplayTime || "Due";
+              displayTime = displayTime.replace('mins', 'min').replace('min', 'min'); 
+              if (displayTime.toLowerCase() === 'due') displayTime = 'Due';
 
               return `
                 <div class="dep-row">
