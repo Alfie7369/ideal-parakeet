@@ -208,7 +208,8 @@
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}s/{x}/{y}.png', {
+    // Fixed tile URL typo
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
@@ -266,16 +267,13 @@
       "Clifton South": "Purple Line"
     };
 
-    // Strict Timetable Slot Lookup matching the PDF columns exactly
     function getTimetableSlots(hour, lineType) {
-      // Define exact departure minute slots based on PDF frequency blocks
       let interval = 7;
       if (hour < 7 || hour >= 21) interval = 15;
       else if ((hour >= 10 && hour < 15) || (hour >= 19 && hour < 21)) interval = 10;
 
-      // Generate exact minute marks for the current hour based on timetable offsets
       let slots = [];
-      let baseOffset = lineType === 'green' ? 1 : 4; // Toton/Hucknall typically anchors around :01 / :04
+      let baseOffset = lineType === 'green' ? 1 : 4;
       
       for (let m = baseOffset; m < 60; m += interval) {
         slots.push(m);
@@ -291,21 +289,19 @@
       let departures = [];
 
       function evaluateDirection(dest, lineType, color) {
-        // Check current hour slots, plus next hour slots if needed
         let slots = getTimetableSlots(currentHour, lineType);
         let nextHourSlots = getTimetableSlots((currentHour + 1) % 24, lineType);
         
         let allMinutes = [];
         slots.forEach(m => {
           if (m >= currentMinute) allMinutes.push(m - currentMinute);
-          else allMinutes.push((60 - currentMinute) + m); // Rollover into next hour
+          else allMinutes.push((60 - currentMinute) + m);
         });
         
         nextHourSlots.forEach(m => {
           allMinutes.push((60 - currentMinute) + 60 + m);
         });
 
-        // Sort chronologically and take next 3 strict departures
         allMinutes.sort((a, b) => a - b);
         let uniqueMins = [...new Set(allMinutes)].slice(0, 3);
 
