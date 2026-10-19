@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Exact Woodside Road coordinates for UN24/UN23, and Parliament Street for J3/J4
+    // Reverted completely to the original, correct NaPTAN coordinates
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9361, lon: -1.2102, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9358, lon: -1.2098, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.95665, lon: -1.14652, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.95690, lon: -1.14612, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9332, lon: -1.1982, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9328, lon: -1.1989, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9565, lon: -1.1465, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9568, lon: -1.1461, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
