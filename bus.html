@@ -17,6 +17,8 @@
       --text-muted: #94a3b8;
       --border: #334155;
       --bus-green: #22c55e;
+      --bus-orange: #f97316;
+      --bus-purple: #a855f7;
     }
     
     body {
@@ -113,7 +115,7 @@
     }
     .leaflet-popup-content {
       margin: 0;
-      width: 250px !important;
+      width: 260px !important;
     }
     .leaflet-container a.leaflet-popup-close-button {
       color: var(--text-muted);
@@ -157,11 +159,21 @@
       font-size: 0.95rem;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 150px;
+      max-width: 170px;
+    }
+    .dep-line-badge {
+      background-color: var(--border);
+      color: var(--text-main);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      min-width: 24px;
+      text-align: center;
     }
     .dep-time {
       color: var(--accent);
@@ -172,9 +184,6 @@
     .dep-time.due {
       color: var(--bus-green);
       animation: pulse 2s infinite;
-    }
-    .indicator {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background-color: var(--accent);
     }
     @keyframes pulse {
       0% { opacity: 1; }
@@ -213,31 +222,31 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Target Stops with NaPTAN ATCO codes for NCT API endpoint
+    // Stops mapped using the specific NCT ArcticAPI codes
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9332, lon: -1.1982 },
-      { name: "Uni West Gate (UN23)", code: "33090UN23", lat: 52.9328, lon: -1.1989 },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9565, lon: -1.1465 },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9568, lon: -1.1461 }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9332, lon: -1.1982, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9328, lon: -1.1989, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9565, lon: -1.1465, color: "var(--bus-purple)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9568, lon: -1.1461, color: "var(--bus-purple)" }
     ];
 
     async function initBusMap() {
       busStops.forEach(stop => {
         const marker = L.circleMarker([stop.lat, stop.lon], {
           radius: 7,
-          fillColor: "#38bdf8",
+          fillColor: stop.color,
           color: "#0f172a",
           weight: 2,
           opacity: 1,
           fillOpacity: 1
         }).addTo(map);
 
-        marker.bindPopup(`<div style="padding: 15px; text-align: center; color: var(--text-muted);">Fetching live departures...</div>`);
+        marker.bindPopup(`<div style="padding: 15px; text-align: center; color: var(--text-muted);">Fetching live telemetry...</div>`);
 
         marker.on('popupopen', async (e) => {
           const popup = e.popup;
           try {
-            // Query ArcticAPI visits endpoint directly
+            // Fetching directly from the official ArcticAPI endpoint
             const res = await fetch(`https://nctx.arcticapi.com/network/stops/${stop.code}/visits`);
             
             if (!res.ok) {
@@ -245,25 +254,26 @@
             }
 
             const data = await res.json();
-            let visits = data.visits || data || [];
-            
-            if (!Array.isArray(visits) || visits.length === 0) {
+            let departures = Array.isArray(data) ? data : (data.visits || data.departures || []);
+
+            if (departures.length === 0) {
               popup.setContent(`
-                <div class="schedule-header">
+                <div class="schedule-header" style="border-top-color: ${stop.color};">
                   <p class="schedule-title">${stop.name}</p>
                   <p class="schedule-subtitle">Live Departures</p>
                 </div>
                 <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                  No live departures available.
+                  No live departures currently listed.
                 </div>
               `);
               return;
             }
 
-            let rowsHTML = visits.slice(0, 5).map(v => {
-              const line = v.lineName || v.line || "Bus";
-              const dest = v.destinationName || v.destination || "City Centre";
-              const expectedTime = v.expectedDepartureTime || v.aimedDepartureTime;
+            let rowsHTML = departures.slice(0, 5).map(d => {
+              // Extract data based on standard ArcticAPI keys
+              const route = d.lineName || d.publishedLineName || d.line || "Bus";
+              const dest = d.destinationName || d.destinationDisplay || d.destination || "City Centre";
+              const expectedTime = d.expectedDepartureTime || d.aimedDepartureTime;
 
               let displayTime = "Due";
               if (expectedTime) {
@@ -276,9 +286,9 @@
 
               return `
                 <div class="dep-row">
-                  <div class="dep-dest" title="${line} - ${dest}">
-                    <div class="indicator"></div>
-                    <strong>${line}</strong> ${dest}
+                  <div class="dep-dest" title="${route} - ${dest}">
+                    <div class="dep-line-badge" style="background-color: ${stop.color}; color: #fff;">${route}</div>
+                    ${dest}
                   </div>
                   <div class="dep-time ${displayTime === 'Due' ? 'due' : ''}">${displayTime}</div>
                 </div>
@@ -286,7 +296,7 @@
             }).join('');
 
             popup.setContent(`
-              <div class="schedule-header">
+              <div class="schedule-header" style="border-top-color: ${stop.color};">
                 <p class="schedule-title">${stop.name}</p>
                 <p class="schedule-subtitle">Live Departures</p>
               </div>
