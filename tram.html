@@ -17,6 +17,8 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
+      --green-line: #22c55e;
+      --purple-line: #a855f7;
     }
     
     body {
@@ -111,12 +113,77 @@
       color: var(--text-main) !important;
       border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 0;
     }
-    .leaflet-popup-content-wrapper {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    .leaflet-popup-content {
+      margin: 0;
+      width: 250px !important;
     }
     .leaflet-container a.leaflet-popup-close-button {
       color: var(--text-muted);
+      padding: 8px;
+    }
+    
+    /* Schedule Widget Styling */
+    .schedule-header {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+    }
+    .schedule-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin: 0;
+    }
+    .schedule-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin: 4px 0 0 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .schedule-body {
+      padding: 10px 15px 15px 15px;
+    }
+    .dep-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dep-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .dep-dest {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    .dep-time {
+      color: var(--accent);
+      font-weight: bold;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .dep-time.due {
+      color: var(--green-line);
+      animation: pulse 2s infinite;
+    }
+    .indicator {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
@@ -140,20 +207,21 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
-    // Initialize map centered around the NET network
+    // TransportAPI Credentials
+    const APP_ID = '1ed6bf42';
+    const APP_KEY = 'a7ecd96d0b2585d4cac92e822712f0ae';
+
     const map = L.map('map', {
       zoomControl: false
     }).setView([52.955, -1.185], 12);
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Free API-less OpenStreetMap tiles (dark-themed via CSS filter)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
 
-    // Full Schedule Mapping from the Network Map PDF
     const lineMapping = {
       // Green Line North
       "Hucknall": "Green Line",
@@ -161,11 +229,9 @@
       "Moor Bridge": "Green Line",
       "Bulwell Forest": "Green Line",
       "Bulwell": "Green Line",
-      
       // Purple Line North
       "Phoenix Park": "Purple Line",
       "Cinderhill": "Purple Line",
-      
       // Shared Central Section
       "Highbury Vale": "Green & Purple Lines",
       "David Lane": "Green & Purple Lines",
@@ -183,7 +249,6 @@
       "Old Market Square": "Green & Purple Lines",
       "Lace Market": "Green & Purple Lines",
       "Nottingham Station": "Green & Purple Lines",
-      
       // Green Line South
       "Meadows Way West": "Green Line",
       "NG2": "Green Line",
@@ -194,13 +259,12 @@
       "Middle Street": "Green Line",
       "Beeston Centre": "Green Line",
       "Chilwell Road": "Green Line",
-      "High Road - Central College": "Green Line",
+      "High Road": "Green Line",
       "Cator Lane": "Green Line",
       "Bramcote Lane": "Green Line",
       "Eskdale Drive": "Green Line",
       "Inham Road": "Green Line",
       "Toton Lane": "Green Line",
-      
       // Purple Line South
       "Queens Walk": "Purple Line",
       "Meadows Embankment": "Purple Line",
@@ -216,7 +280,6 @@
       "Clifton South": "Purple Line"
     };
 
-    // Fetch ALL route layout lines AND tram stops via Overpass API dynamically
     async function loadTramNetwork() {
       try {
         const query = `
@@ -236,27 +299,27 @@
         
         const nodes = {};
         
-        // Pass 1: Collect nodes and draw every station marker
         data.elements.forEach(el => {
           if (el.type === 'node') {
-            nodes[el.id] = [el.lat, el.lon]; // Save coordinates for track drawing
+            nodes[el.id] = [el.lat, el.lon]; 
             
-            // Plot Tram Stops
             if (el.tags && el.tags.railway === 'tram_stop') {
               let rawName = el.tags.name || "Unknown Stop";
               
-              // Normalize names to match our schedule dictionary
-              let cleanName = rawName.replace(" Tram Stop", "").trim();
-              if (cleanName === "QMC") cleanName = "Queens Medical Centre";
-              if (cleanName.includes("High Road")) cleanName = "High Road - Central College";
-              
-              let lineStr = lineMapping[cleanName] || "NET Tram Stop";
-              
-              // Assign colors based on schedule
+              let lineStr = "NET Tram Stop";
               let dotColor = "#38bdf8"; 
-              if (lineStr.includes("Green")) dotColor = "#22c55e"; 
-              if (lineStr.includes("Purple")) dotColor = "#a855f7"; 
-              if (lineStr.includes("Green & Purple")) dotColor = "#f8fafc"; 
+              let displayTitle = rawName.replace(" Tram Stop", "").replace(" (Platform 1)", "").replace(" (Platform 2)", "").trim();
+
+              for (const [key, val] of Object.entries(lineMapping)) {
+                if (rawName.toLowerCase().includes(key.toLowerCase())) {
+                  lineStr = val;
+                  displayTitle = key; 
+                  if (val.includes("Green")) dotColor = "#22c55e"; 
+                  if (val.includes("Purple")) dotColor = "#a855f7"; 
+                  if (val.includes("Green & Purple")) dotColor = "#f8fafc";
+                  break;
+                }
+              }
               
               const marker = L.circleMarker([el.lat, el.lon], {
                 radius: 6,
@@ -267,17 +330,95 @@
                 fillOpacity: 1
               }).addTo(map);
 
-              marker.bindPopup(`
-                <div style="font-family: inherit;">
-                  <strong style="font-size: 1.05rem; color: ${dotColor === '#f8fafc' ? '#38bdf8' : dotColor};">${cleanName}</strong><br>
-                  <span style="font-size: 0.85rem; color: #94a3b8;">${lineStr}</span>
-                </div>
-              `);
+              // Setup empty popup to be filled dynamically on click
+              marker.bindPopup(`<div style="padding: 20px; text-align: center; color: var(--text-muted);">Establishing secure link...</div>`);
+              
+              marker.on('popupopen', async (e) => {
+                const popup = e.popup;
+                try {
+                  // 1. Ask TransportAPI for the exact ATCO platform code at these GPS coordinates
+                  const placeRes = await fetch(`https://transportapi.com/v3/uk/places.json?lat=${el.lat}&lon=${el.lon}&type=tram_stop&app_id=${APP_ID}&app_key=${APP_KEY}`);
+                  const placeData = await placeRes.json();
+                  
+                  if (!placeData.member || placeData.member.length === 0) {
+                    popup.setContent(`<div style="padding: 20px; text-align: center; color: var(--text-muted);">No live telemetry available.</div>`);
+                    return;
+                  }
+                  
+                  const atcoCode = placeData.member[0].atcocode;
+                  
+                  // 2. Fetch the live scheduled departures for that platform
+                  const depRes = await fetch(`https://transportapi.com/v3/uk/tram/stop/${atcoCode}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}&group=no`);
+                  const depData = await depRes.json();
+                  
+                  let departures = [];
+                  if (depData.departures && depData.departures.all) {
+                    departures = depData.departures.all.slice(0, 5); // Grab the next 5 trams
+                  }
+                  
+                  if (departures.length === 0) {
+                    popup.setContent(`
+                      <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
+                        <p class="schedule-title">${displayTitle}</p>
+                        <p class="schedule-subtitle">${lineStr}</p>
+                      </div>
+                      <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 20px;">
+                        No scheduled departures.
+                      </div>
+                    `);
+                    return;
+                  }
+                  
+                  // 3. Build the departure rows
+                  let rowsHTML = departures.map(d => {
+                    const dest = d.destination;
+                    const timeStr = d.expected_departure_time || d.aimed_departure_time;
+                    
+                    let routeColor = "var(--accent)";
+                    if (dest.includes("Toton") || dest.includes("Hucknall")) routeColor = "var(--green-line)";
+                    if (dest.includes("Clifton") || dest.includes("Phoenix")) routeColor = "var(--purple-line)";
+                    
+                    // Calculate live minute countdown
+                    const now = new Date();
+                    const [hrs, mins] = timeStr.split(':');
+                    const depTime = new Date();
+                    depTime.setHours(parseInt(hrs), parseInt(mins), 0);
+                    
+                    let diffMins = Math.round((depTime - now) / 60000);
+                    if (diffMins < 0) diffMins += 1440; // Prevent negative wrap around midnight
+                    
+                    let displayTime = diffMins <= 1 ? "Due" : `${diffMins} min`;
+                    
+                    return `
+                      <div class="dep-row">
+                        <div class="dep-dest" title="${dest}">
+                          <div class="indicator" style="background-color: ${routeColor};"></div>
+                          ${dest}
+                        </div>
+                        <div class="dep-time ${displayTime === 'Due' ? 'due' : ''}">${displayTime}</div>
+                      </div>
+                    `;
+                  }).join('');
+                  
+                  popup.setContent(`
+                    <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
+                      <p class="schedule-title">${displayTitle}</p>
+                      <p class="schedule-subtitle">Live Departures</p>
+                    </div>
+                    <div class="schedule-body">
+                      ${rowsHTML}
+                    </div>
+                  `);
+                  
+                } catch (err) {
+                  console.error("Live Schedule Error:", err);
+                  popup.setContent(`<div style="padding: 20px; text-align: center; color: var(--danger);">Failed to retrieve schedule.</div>`);
+                }
+              });
             }
           }
         });
 
-        // Pass 2: Connect the nodes to draw the tracks
         data.elements.forEach(el => {
           if (el.type === 'way' && el.nodes) {
             const wayCoords = el.nodes.map(nodeId => nodes[nodeId]).filter(coord => coord !== undefined);
@@ -291,7 +432,6 @@
           }
         });
 
-        // Hide loading screen once network is plotted
         document.getElementById('loading-overlay').style.opacity = '0';
         setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
 
