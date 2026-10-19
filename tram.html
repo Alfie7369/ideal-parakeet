@@ -138,26 +138,46 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Key Interchange / Terminus Points across the NET System
+    // Corrected NET Stations based on the official network map
     const stations = [
-      { name: "Toton Lane (Terminus)", coords: [52.9192, -1.2427], line: "Line 2 (Toton Lane)" },
-      { name: "Beeston Centre", coords: [52.9248, -1.2173], line: "Line 2" },
-      { name: "University of Nottingham", coords: [52.9384, -1.1932], line: "Line 2" },
-      { name: "Nottingham Station", coords: [52.9443, -1.1478], line: "Interchange Hub" },
-      { name: "The Lace Market", coords: [52.9521, -1.1432], line: "City Centre Loop" },
-      { name: "Old Market Square", coords: [52.9548, -1.1481], line: "City Centre Loop" },
-      { name: "Forest", coords: [52.9645, -1.1532], line: "Lines 1 & 2" },
-      { name: "Hucknall (Terminus)", coords: [53.0335, -1.2045], line: "Line 1 (Hucknall)" },
-      { name: "Phoenix Park (Terminus)", coords: [53.0031, -1.2185], line: "Line 1 (Phoenix Park)" },
-      { name: "Clifton South (Terminus)", coords: [52.8931, -1.1712], line: "Line 3 (Clifton)" }
+      // Green Line North
+      { name: "Hucknall", coords: [53.0335, -1.2045], line: "Green Line (Terminus)" },
+      
+      // Purple Line North
+      { name: "Phoenix Park", coords: [53.0031, -1.2185], line: "Purple Line (Terminus)" },
+      
+      // Shared Central Section (Highbury Vale to Nottingham Station)
+      { name: "Highbury Vale", coords: [52.9904, -1.1866], line: "Green & Purple Lines (Junction)" },
+      { name: "The Forest", coords: [52.9645, -1.1532], line: "Green & Purple Lines" },
+      { name: "Royal Centre", coords: [52.9565, -1.1505], line: "Green & Purple Lines" },
+      { name: "Old Market Square", coords: [52.9548, -1.1481], line: "Green & Purple Lines" },
+      { name: "Lace Market", coords: [52.9521, -1.1432], line: "Green & Purple Lines" },
+      { name: "Nottingham Station", coords: [52.9443, -1.1478], line: "Green & Purple Lines (Interchange)" },
+      { name: "Meadows Way West", coords: [52.9404, -1.1492], line: "Green Line (Junction)" },
+
+      // Green Line South (via Beeston)
+      { name: "Queens Medical Centre", coords: [52.9427, -1.1833], line: "Green Line" },
+      { name: "University of Nottingham", coords: [52.9384, -1.1932], line: "Green Line" },
+      { name: "Beeston Centre", coords: [52.9248, -1.2173], line: "Green Line" },
+      { name: "Toton Lane", coords: [52.9192, -1.2427], line: "Green Line (Terminus)" },
+
+      // Purple Line South (via Clifton)
+      { name: "Wilford Lane", coords: [52.9298, -1.1420], line: "Purple Line" },
+      { name: "Clifton Centre", coords: [52.9031, -1.1785], line: "Purple Line" },
+      { name: "Clifton South", coords: [52.8931, -1.1712], line: "Purple Line (Terminus)" }
     ];
 
     // Add markers with custom popup details
     stations.forEach(station => {
+      let dotColor = "#38bdf8"; // Default blue
+      if (station.line.includes("Green")) dotColor = "#22c55e"; // Green Line marker
+      if (station.line.includes("Purple")) dotColor = "#a855f7"; // Purple Line marker
+      if (station.line.includes("Green & Purple")) dotColor = "#f8fafc"; // Shared line marker
+
       const marker = L.circleMarker(station.coords, {
         radius: 7,
-        fillColor: "#38bdf8",
-        color: "#f8fafc",
+        fillColor: dotColor,
+        color: "#0f172a",
         weight: 2,
         opacity: 1,
         fillOpacity: 0.9
@@ -165,7 +185,7 @@
 
       marker.bindPopup(`
         <div style="font-family: inherit;">
-          <strong style="font-size: 1.05rem; color: #38bdf8;">${station.name}</strong><br>
+          <strong style="font-size: 1.05rem; color: ${dotColor === '#f8fafc' ? '#38bdf8' : dotColor};">${station.name}</strong><br>
           <span style="font-size: 0.85rem; color: #94a3b8;">${station.line}</span>
         </div>
       `);
@@ -192,7 +212,7 @@
               L.polyline(wayCoords, {
                 color: '#38bdf8',
                 weight: 3,
-                opacity: 0.6
+                opacity: 0.4
               }).addTo(map);
             }
           }
