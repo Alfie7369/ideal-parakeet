@@ -266,19 +266,25 @@
       "Clifton South": "Purple Line"
     };
 
-    // Calculate the current active frequency based on the official NET Timetable
+    // Calculate frequency directly from the official NET Timetable rules
     function getCurrentFrequency() {
       const now = new Date();
       const day = now.getDay();
       const hour = now.getHours();
 
-      if (day === 0) { // Sunday
-        if (hour >= 6 && hour < 23) return 10;
-        return 15;
-      } else { // Monday-Saturday
+      if (day === 0) { 
+        // Sunday Timetable
+        if (hour >= 6 && hour < 7) return 15;
+        if (hour >= 7 && hour < 19) return 10;
+        if (hour >= 19 && hour < 23) return 15;
+        return 15; 
+      } else { 
+        // Monday to Saturday Timetable
+        if (hour >= 6 && hour < 7) return 15;
         if (hour >= 7 && hour < 19) return 7;
         if (hour >= 19 && hour < 21) return 10;
-        return 15;
+        if (hour >= 21) return 15;
+        return 15; 
       }
     }
 
@@ -287,7 +293,7 @@
       const currentMinute = now.getMinutes();
       const frequency = getCurrentFrequency();
       
-      // Calculate a pseudo-random offset based on station name to stagger times across the map
+      // Calculate a pseudo-random offset based on station name to stagger times across the network
       const stationOffset = displayTitle.length % frequency;
       let departures = [];
 
@@ -304,20 +310,21 @@
       }
 
       // Add appropriate departures based on the station's line
+      // Central shared stations will automatically interleave Green and Purple lines
       if (lineStr.includes("Green")) {
         if (displayTitle !== "Hucknall") calculateWaitTimes("Hucknall", "var(--green-line)", 0);
         if (displayTitle !== "Toton Lane") calculateWaitTimes("Toton Lane", "var(--green-line)", Math.floor(frequency / 2));
       }
       
       if (lineStr.includes("Purple")) {
-        if (displayTitle !== "Phoenix Park") calculateWaitTimes("Phoenix Park", "var(--purple-line)", Math.floor(frequency / 3));
+        if (displayTitle !== "Phoenix Park") calculateWaitTimes("Phoenix Park", "var(--purple-line)", Math.floor(frequency / 4));
         if (displayTitle !== "Clifton South") calculateWaitTimes("Clifton South", "var(--purple-line)", Math.floor(frequency / 1.5));
       }
 
       // Sort all calculated departures chronologically
       departures.sort((a, b) => a.val - b.val);
       
-      // Slice to show only the next 4 trams
+      // Slice to show only the next 4 trams to keep the popup clean
       const nextTrams = departures.slice(0, 4);
 
       let rowsHTML = nextTrams.map(d => `
@@ -423,4 +430,3 @@
 
 </body>
 </html>
-
