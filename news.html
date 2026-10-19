@@ -137,57 +137,75 @@
   <script>
     // The official BBC Nottingham & East Midlands RSS feed
     const rssUrl = 'https://feeds.bbci.co.uk/news/england/nottingham/rss.xml';
-    // Using rss2json proxy to bypass CORS and parse XML cleanly
-    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
     function timeAgo(dateString) {
-      const date = new Date(dateString.replace(' ', 'T')); // Formatting fix for older browsers
+      if (!dateString) return "Recently";
+      const date = new Date(dateString);
       const now = new Date();
       const seconds = Math.floor((now - date) / 1000);
       
       let interval = seconds / 3600;
-      if (interval > 1) return Math.floor(interval) + " hours ago";
+      if (interval >= 1) {
+        const hours = Math.floor(interval);
+        return hours + (hours === 1 ? " hour ago" : " hours ago");
+      }
       
       interval = seconds / 60;
-      if (interval > 1) return Math.floor(interval) + " mins ago";
+      if (interval >= 1) return Math.floor(interval) + " mins ago";
       
-      return Math.floor(seconds) + " seconds ago";
+      return "Just now";
     }
 
     async function fetchNews() {
       const feedContainer = document.getElementById('news-feed');
       
       try {
-        const response = await fetch(apiUrl);
+        // Add cache-buster to ensure fresh news
+        const cacheBuster = new Date().getTime();
+        const targetUrl = rssUrl + '?cb=' + cacheBuster;
+        
+        // Use the reliable AllOrigins proxy we already use for the radio metadata
+        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+        
+        const response = await fetch(proxyUrl);
         const data = await response.json();
         
-        if (data.status === 'ok') {
-          feedContainer.innerHTML = ''; // Clear loading text
+        if (!data.contents) throw new Error("Empty response from proxy");
+
+        // Use the browser's built-in XML parser to read the RSS feed
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        
+        // Extract all the article items
+        const items = Array.from(xmlDoc.querySelectorAll('item')).slice(0, 5);
+        
+        if (items.length === 0) throw new Error("No news items found in XML");
+
+        feedContainer.innerHTML = ''; // Clear loading text
+        
+        items.forEach(item => {
+          const title = item.querySelector('title')?.textContent || 'No title';
+          const description = item.querySelector('description')?.textContent || '';
+          const link = item.querySelector('link')?.textContent || '#';
+          const pubDate = item.querySelector('pubDate')?.textContent || '';
           
-          // Pull top 5 articles
-          const items = data.items.slice(0, 5);
+          const card = document.createElement('a');
+          card.className = 'news-card';
+          card.href = link;
+          card.target = '_blank';
+          card.rel = 'noopener noreferrer';
           
-          items.forEach(item => {
-            const card = document.createElement('a');
-            card.className = 'news-card';
-            card.href = item.link;
-            card.target = '_blank';
-            card.rel = 'noopener noreferrer';
-            
-            card.innerHTML = `
-              <h3 class="news-title">${item.title}</h3>
-              <p class="news-desc">${item.description}</p>
-              <div class="news-meta">
-                <span class="timestamp">${timeAgo(item.pubDate)}</span>
-                <span>Read more →</span>
-              </div>
-            `;
-            
-            feedContainer.appendChild(card);
-          });
-        } else {
-          throw new Error('Failed to load feed');
-        }
+          card.innerHTML = `
+            <h3 class="news-title">${title}</h3>
+            <p class="news-desc">${description}</p>
+            <div class="news-meta">
+              <span class="timestamp">${timeAgo(pubDate)}</span>
+              <span>Read more →</span>
+            </div>
+          `;
+          
+          feedContainer.appendChild(card);
+        });
       } catch (error) {
         console.error("News fetch error:", error);
         feedContainer.innerHTML = '<div id="loading">Failed to load headlines. Trying again shortly...</div>';
