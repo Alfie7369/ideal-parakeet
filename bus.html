@@ -16,6 +16,7 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
+      --bus-green: #22c55e;
       --bus-orange: #f97316;
     }
     
@@ -180,7 +181,7 @@
       flex-shrink: 0;
     }
     .dep-time.due {
-      color: var(--bus-orange);
+      color: var(--bus-green);
       animation: pulse 2s infinite;
     }
     @keyframes pulse {
@@ -220,6 +221,7 @@
       maxZoom: 19
     }).addTo(map);
 
+    // Exact street coordinates with the requested orange markers and NCT stop IDs
     const busStops = [
       { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93292, lon: -1.19830, color: "var(--bus-orange)" },
       { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93262, lon: -1.19885, color: "var(--bus-orange)" },
@@ -243,49 +245,34 @@
         marker.on('popupopen', async (e) => {
           const popup = e.popup;
           try {
-            // Encode the official NCT URL
-            const targetUrl = encodeURIComponent(`https://nctx.arcticapi.com/network/stops/${stop.code}/visits`);
+            // Fetch directly from Simon Prickett's Cloudflare Worker
+            const res = await fetch(`https://nctx.crudworks.workers.dev/?stopId=${stop.code}`);
+            if (!res.ok) throw new Error("Worker returned status: " + res.status);
             
-            // Fetch via AllOrigins to bypass strict CORS policies preventing browser access
-            const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
-            
-            if (!res.ok) throw new Error("API returned status: " + res.status);
-            
-            const data = await res.json();
-            
-            let departures = [];
-            if (data && data._embedded && Array.isArray(data._embedded.visits)) {
-              departures = data._embedded.visits;
-            } else if (data && Array.isArray(data.visits)) {
-              departures = data.visits;
-            }
+            // The worker parses the HTML and returns a direct JSON array
+            const departures = await res.json();
 
-            if (departures.length === 0) {
+            if (!Array.isArray(departures) || departures.length === 0) {
               popup.setContent(`
                 <div class="schedule-header" style="border-top-color: ${stop.color};">
                   <p class="schedule-title">${stop.name}</p>
                   <p class="schedule-subtitle">Live Departures</p>
                 </div>
                 <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                  No live departures currently returned by API.
+                  No live departures currently listed.
                 </div>
               `);
               return;
             }
 
+            // Map fields natively from the worker's response schema
             let rowsHTML = departures.slice(0, 5).map(d => {
-              let route = "Bus";
-              if (d._links && d._links["transmodel:line"] && d._links["transmodel:line"].name) {
-                route = d._links["transmodel:line"].name;
-              } else if (d.lineName) {
-                route = d.lineName;
-              }
+              const route = d.routeNumber || "Bus";
+              const dest = d.destination || "City Centre";
               
-              const dest = d.destinationName || "City Centre";
-              
-              let displayTime = d.displayTime || d.departureDisplayTime || "Due";
-              displayTime = displayTime.replace('mins', 'min').replace('min', 'min'); 
-              if (displayTime.toLowerCase() === 'due') displayTime = 'Due';
+              // Handle minute integers accurately
+              const mins = d.expectedMins !== undefined ? d.expectedMins : 0;
+              const displayTime = mins <= 0 ? "Due" : `${mins} min`;
 
               return `
                 <div class="dep-row">
@@ -309,15 +296,15 @@
             `);
 
           } catch (err) {
-            console.error("CORS Proxy / API Error:", err);
+            console.error("Worker Proxy Error:", err);
             popup.setContent(`
               <div class="schedule-header" style="border-top-color: ${stop.color};">
                 <p class="schedule-title">${stop.name}</p>
                 <p class="schedule-subtitle">Live Departures</p>
               </div>
               <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                Unable to fetch data due to network block.<br>
-                <small style="opacity:0.4; font-size:0.75rem;">Check developer console.</small>
+                Unable to retrieve network data.<br>
+                <small style="opacity:0.4; font-size:0.75rem;">Check console for errors.</small>
               </div>
             `);
           }
