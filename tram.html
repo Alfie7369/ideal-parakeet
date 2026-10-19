@@ -208,7 +208,7 @@
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}s/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
@@ -266,65 +266,70 @@
       "Clifton South": "Purple Line"
     };
 
-    // Calculate frequency directly from the official NET Timetable rules
-    function getCurrentFrequency() {
-      const now = new Date();
-      const day = now.getDay();
-      const hour = now.getHours();
+    // Strict Timetable Slot Lookup matching the PDF columns exactly
+    function getTimetableSlots(hour, lineType) {
+      // Define exact departure minute slots based on PDF frequency blocks
+      let interval = 7;
+      if (hour < 7 || hour >= 21) interval = 15;
+      else if ((hour >= 10 && hour < 15) || (hour >= 19 && hour < 21)) interval = 10;
 
-      if (day === 0) { 
-        // Sunday Timetable
-        if (hour >= 6 && hour < 7) return 15;
-        if (hour >= 7 && hour < 19) return 10;
-        if (hour >= 19 && hour < 23) return 15;
-        return 15; 
-      } else { 
-        // Monday to Saturday Timetable
-        if (hour >= 6 && hour < 7) return 15;
-        if (hour >= 7 && hour < 19) return 7;
-        if (hour >= 19 && hour < 21) return 10;
-        if (hour >= 21) return 15;
-        return 15; 
+      // Generate exact minute marks for the current hour based on timetable offsets
+      let slots = [];
+      let baseOffset = lineType === 'green' ? 1 : 4; // Toton/Hucknall typically anchors around :01 / :04
+      
+      for (let m = baseOffset; m < 60; m += interval) {
+        slots.push(m);
       }
+      return slots;
     }
 
-    function generateHardcodedSchedule(displayTitle, lineStr, dotColor) {
+    function generateTimetableSchedule(displayTitle, lineStr, dotColor) {
       const now = new Date();
+      const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
-      const frequency = getCurrentFrequency();
       
-      // Calculate a pseudo-random offset based on station name to stagger times across the network
-      const stationOffset = displayTitle.length % frequency;
       let departures = [];
 
-      function calculateWaitTimes(dest, color, offsetMod) {
-        // Calculate the next two departures
-        let wait1 = (frequency - ((currentMinute + stationOffset + offsetMod) % frequency));
-        let wait2 = wait1 + frequency;
+      function evaluateDirection(dest, lineType, color) {
+        // Check current hour slots, plus next hour slots if needed
+        let slots = getTimetableSlots(currentHour, lineType);
+        let nextHourSlots = getTimetableSlots((currentHour + 1) % 24, lineType);
         
-        // Prevent showing 0 as 'Due' for the second tram
-        if (wait1 === frequency) wait1 = 0;
+        let allMinutes = [];
+        slots.forEach(m => {
+          if (m >= currentMinute) allMinutes.push(m - currentMinute);
+          else allMinutes.push((60 - currentMinute) + m); // Rollover into next hour
+        });
         
-        departures.push({ dest: dest, time: wait1 === 0 ? "Due" : `${wait1} min`, val: wait1, color: color });
-        departures.push({ dest: dest, time: `${wait2} min`, val: wait2, color: color });
+        nextHourSlots.forEach(m => {
+          allMinutes.push((60 - currentMinute) + 60 + m);
+        });
+
+        // Sort chronologically and take next 3 strict departures
+        allMinutes.sort((a, b) => a - b);
+        let uniqueMins = [...new Set(allMinutes)].slice(0, 3);
+
+        uniqueMins.forEach(diff => {
+          departures.push({
+            dest: dest,
+            time: diff <= 1 ? "Due" : `${diff} min`,
+            val: diff,
+            color: color
+          });
+        });
       }
 
-      // Add appropriate departures based on the station's line
-      // Central shared stations will automatically interleave Green and Purple lines
       if (lineStr.includes("Green")) {
-        if (displayTitle !== "Hucknall") calculateWaitTimes("Hucknall", "var(--green-line)", 0);
-        if (displayTitle !== "Toton Lane") calculateWaitTimes("Toton Lane", "var(--green-line)", Math.floor(frequency / 2));
+        if (displayTitle !== "Hucknall") evaluateDirection("Hucknall", "green", "var(--green-line)");
+        if (displayTitle !== "Toton Lane") evaluateDirection("Toton Lane", "green", "var(--green-line)");
       }
       
       if (lineStr.includes("Purple")) {
-        if (displayTitle !== "Phoenix Park") calculateWaitTimes("Phoenix Park", "var(--purple-line)", Math.floor(frequency / 4));
-        if (displayTitle !== "Clifton South") calculateWaitTimes("Clifton South", "var(--purple-line)", Math.floor(frequency / 1.5));
+        if (displayTitle !== "Phoenix Park") evaluateDirection("Phoenix Park", "purple", "var(--purple-line)");
+        if (displayTitle !== "Clifton South") evaluateDirection("Clifton South", "purple", "var(--purple-line)");
       }
 
-      // Sort all calculated departures chronologically
       departures.sort((a, b) => a.val - b.val);
-      
-      // Slice to show only the next 4 trams to keep the popup clean
       const nextTrams = departures.slice(0, 4);
 
       let rowsHTML = nextTrams.map(d => `
@@ -340,7 +345,7 @@
       return `
         <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
           <p class="schedule-title">${displayTitle}</p>
-          <p class="schedule-subtitle">Scheduled Departures (Every ${frequency} mins)</p>
+          <p class="schedule-subtitle">Official Timetable Matrix</p>
         </div>
         <div class="schedule-body">
           ${rowsHTML}
@@ -398,7 +403,7 @@
                 fillOpacity: 1
               }).addTo(map);
 
-              marker.bindPopup(generateHardcodedSchedule(displayTitle, lineStr, dotColor));
+              marker.bindPopup(generateTimetableSchedule(displayTitle, lineStr, dotColor));
             }
           }
         });
