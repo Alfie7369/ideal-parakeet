@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Reverted completely to the original, correct NaPTAN coordinates
+    // Exact GPS coordinates pulled directly from raw telemetry for Milton St & Woodside Rd
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9332, lon: -1.1982, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9328, lon: -1.1989, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9565, lon: -1.1465, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9568, lon: -1.1461, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9321, lon: -1.2015, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9320, lon: -1.2012, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9562, lon: -1.1483, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9560, lon: -1.1483, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
