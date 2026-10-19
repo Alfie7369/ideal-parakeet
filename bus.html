@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Exact coordinates aligned strictly to the OSM mapping nodes and raw API telemetry
+    // Hardcoded exact coordinates provided from Google Maps
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9340, lon: -1.2035, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9339, lon: -1.2037, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9562, lon: -1.1482, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9565, lon: -1.1482, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9346736, lon: -1.2064483, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9345500, lon: -1.2065500, color: "var(--bus-orange)" }, // Micro-offset so they don't perfectly overlap
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9563297, lon: -1.1499643, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9559560, lon: -1.1490561, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
