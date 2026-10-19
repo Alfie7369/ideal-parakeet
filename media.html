@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hawkes House | Media Catalog</title>
   
-  <!-- PapaParse library to cleanly read the Google Sheet CSV format -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <style>
@@ -65,6 +64,7 @@
       display: flex;
       flex-direction: column;
       transition: transform 0.2s, border-color 0.2s;
+      max-height: 450px; /* Constrain tall cards */
     }
     .album-card:hover {
       transform: translateY(-4px);
@@ -79,8 +79,8 @@
       align-items: center;
     }
     .album-cover {
-      width: 70px;
-      height: 70px;
+      width: 75px;
+      height: 75px;
       border-radius: 6px;
       object-fit: cover;
       background-color: var(--bg);
@@ -107,14 +107,21 @@
       margin: 0;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .track-list {
       margin: 0;
       padding-left: 1.25rem;
+      padding-right: 0.5rem;
       color: var(--text-muted);
       font-size: 0.9rem;
       line-height: 1.7;
       flex-grow: 1;
+      overflow-y: auto; /* Adds scrollbar to long tracklists */
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
     }
     #loading-state {
       text-align: center;
@@ -140,7 +147,6 @@
       const grid = document.getElementById("album-grid");
       const loadingState = document.getElementById("loading-state");
 
-      // The live export URL of your public Google Sheet
       const sheetUrl = "https://docs.google.com/spreadsheets/d/1e1oM1jEF6Ke8lH_r_FjgORbyaIP5Q7Xaw4LDRjHlg4M/export?format=csv";
 
       Papa.parse(sheetUrl, {
@@ -152,7 +158,6 @@
           let albumCounter = 0;
 
           rawData.forEach(row => {
-            // Skip empty rows
             if (row.length < 4 || !row[0]) return;
             
             const rowArtist = row[0].trim();
@@ -173,7 +178,6 @@
             }
             
             let finalTrackName = trackTitle;
-            // Append the track's artist if it differs from the main album artist
             if (rowArtist !== albums[albumKey].mainArtist) {
               finalTrackName = trackTitle + ` <span style="font-size: 0.85em; opacity: 0.7;">— ${rowArtist}</span>`;
             }
@@ -181,10 +185,8 @@
             albums[albumKey].tracks.push(finalTrackName);
           });
 
-          // Remove loading text
           loadingState.style.display = 'none';
           
-          // Render the Grid
           Object.values(albums).forEach(album => {
             const card = document.createElement("div");
             card.className = "album-card";
@@ -193,10 +195,10 @@
             
             card.innerHTML = `
               <div class="album-header">
-                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><rect width='70' height='70' fill='%230f172a'/></svg>" class="album-cover" id="cover-${album.id}" alt="Cover">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='75' height='75'><rect width='75' height='75' fill='%230f172a'/></svg>" class="album-cover" id="cover-${album.id}" alt="Cover">
                 <div class="album-info">
                   <h2 class="album-title" title="${album.title.replace(/"/g, '&quot;')}">${album.title}</h2>
-                  <p class="album-meta">${album.mainArtist} • ${album.year}</p>
+                  <p class="album-meta" title="${album.mainArtist}">${album.mainArtist} • ${album.year}</p>
                 </div>
               </div>
               <ol class="track-list">
@@ -214,17 +216,32 @@
         }
       });
 
-      // Fetches iTunes artwork dynamically
       async function fetchArtwork(artist, title, id) {
         try {
-          const query = encodeURIComponent(`${artist} ${title}`);
-          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+          // Clean data: Strip out text after colons or brackets, and remove weird punctuation to help iTunes find it
+          const cleanTitle = title.split(':')[0].split('(')[0].replace(/[^a-zA-Z0-9 ]/g, " ").trim();
+          const cleanArtist = artist.split('feat.')[0].split('&')[0].trim(); 
+          
+          const query = encodeURIComponent(`${cleanArtist} ${cleanTitle}`);
+          
+          // Request up to 3 results so we can verify them
+          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=3`);
           const data = await res.json();
+          
           if (data.results && data.results.length > 0) {
-            document.getElementById(`cover-${id}`).src = data.results[0].artworkUrl100;
+            // Verification step: Ensure the iTunes result artist name contains the first word of our requested artist
+            // This prevents completely random albums from showing up when iTunes gets confused
+            const artistFirstWord = cleanArtist.split(' ')[0].toLowerCase();
+            const validMatch = data.results.find(r => r.artistName.toLowerCase().includes(artistFirstWord));
+            
+            if (validMatch) {
+              // Request the crisp 300x300 image instead of the blurry 100x100 default
+              const hqArtwork = validMatch.artworkUrl100.replace('100x100bb', '300x300bb');
+              document.getElementById(`cover-${id}`).src = hqArtwork;
+            }
           }
         } catch (e) {
-          // Fails gracefully, leaves default dark square
+          // Fails gracefully, leaving the default dark square
         }
       }
     });
