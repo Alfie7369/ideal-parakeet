@@ -85,7 +85,12 @@
       background-color: #0b1329;
     }
 
-    /* Custom Dark Mode Styling Overrides for Leaflet */
+    /* CSS Dark Mode Filter for OpenStreetMap Tiles */
+    .leaflet-tile {
+      filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+    }
+
+    /* Custom Popup Theme Styling */
     .leaflet-popup-content-wrapper, .leaflet-popup-tip {
       background-color: var(--card-bg) !important;
       color: var(--text-main) !important;
@@ -119,7 +124,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
-    // Initialize map centered roughly around Nottingham / Beeston area
+    // Initialize map centered around Beeston/Nottingham area
     const map = L.map('map', {
       zoomControl: false
     }).setView([52.938, -1.185], 13);
@@ -127,10 +132,9 @@
     // Add custom zoom control to top-right
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Load CartoDB Dark Matter tiles to perfectly match your dark UI theme
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+    // Free OpenStreetMap tiles (dark-themed via CSS filter)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map);
 
@@ -167,7 +171,7 @@
       `);
     });
 
-    // Optional: Fetch live route layout lines via Overpass API (OpenStreetMap Tram data)
+    // Fetch live route layout lines via Overpass API (OpenStreetMap Tram data)
     async function loadTramTracks() {
       try {
         const query = `[out:json];relation["route"="tram"]["operator"="Nottingham Express Transit"];(._;>;);out body;`;
@@ -176,7 +180,6 @@
         const response = await fetch(url);
         const data = await response.json();
         
-        // Parse nodes and ways to draw exact track paths
         const nodes = {};
         data.elements.forEach(el => {
           if (el.type === 'node') nodes[el.id] = [el.lat, el.lon];
