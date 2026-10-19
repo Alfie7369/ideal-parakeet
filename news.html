@@ -160,21 +160,18 @@
       const feedContainer = document.getElementById('news-feed');
       
       try {
-        // Add cache-buster to ensure fresh news
-        const cacheBuster = new Date().getTime();
-        const targetUrl = rssUrl + '?cb=' + cacheBuster;
-        
-        // Use the reliable AllOrigins proxy we already use for the radio metadata
-        const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+        // corsproxy.io is much better at bypassing strict news site firewalls
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(rssUrl);
         
         const response = await fetch(proxyUrl);
-        const data = await response.json();
+        if (!response.ok) throw new Error("Proxy fetch failed with status: " + response.status);
         
-        if (!data.contents) throw new Error("Empty response from proxy");
+        // Fetch the raw XML text directly
+        const xmlText = await response.text();
 
-        // Use the browser's built-in XML parser to read the RSS feed
+        // Use the browser's built-in XML parser
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         
         // Extract all the article items
         const items = Array.from(xmlDoc.querySelectorAll('item')).slice(0, 5);
@@ -215,7 +212,7 @@
     // Initial fetch
     fetchNews();
     
-    // Refresh feed every 15 minutes to keep headlines current
+    // Refresh feed every 15 minutes
     setInterval(fetchNews, 900000);
   </script>
 
