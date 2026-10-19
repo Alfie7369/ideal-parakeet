@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Exact street coordinates with the requested orange markers and NCT stop IDs
+    // Corrected street-level coordinates for Uni West Gate and Victoria Centre
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93292, lon: -1.19830, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93262, lon: -1.19885, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.95665, lon: -1.14652, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.95690, lon: -1.14612, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9333, lon: -1.1997, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9330, lon: -1.2001, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9562, lon: -1.1453, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9564, lon: -1.1450, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
@@ -245,14 +245,16 @@
         marker.on('popupopen', async (e) => {
           const popup = e.popup;
           try {
-            // Fetch directly from Simon Prickett's Cloudflare Worker
             const res = await fetch(`https://nctx.crudworks.workers.dev/?stopId=${stop.code}`);
             if (!res.ok) throw new Error("Worker returned status: " + res.status);
             
-            // The worker parses the HTML and returns a direct JSON array
-            const departures = await res.json();
+            // Parse the parent object first
+            const data = await res.json();
+            
+            // Extract the 'departures' array from inside the object
+            const departures = data.departures || [];
 
-            if (!Array.isArray(departures) || departures.length === 0) {
+            if (departures.length === 0) {
               popup.setContent(`
                 <div class="schedule-header" style="border-top-color: ${stop.color};">
                   <p class="schedule-title">${stop.name}</p>
@@ -265,14 +267,19 @@
               return;
             }
 
-            // Map fields natively from the worker's response schema
+            // Map the rows natively using the exact keys shown in your worker payload
             let rowsHTML = departures.slice(0, 5).map(d => {
               const route = d.routeNumber || "Bus";
               const dest = d.destination || "City Centre";
               
-              // Handle minute integers accurately
-              const mins = d.expectedMins !== undefined ? d.expectedMins : 0;
-              const displayTime = mins <= 0 ? "Due" : `${mins} min`;
+              let displayTime = d.expected || `${d.expectedMins} min`;
+              
+              // Handle "Due" and clean up formatting
+              if (d.expectedMins <= 0) {
+                displayTime = "Due";
+              } else {
+                displayTime = displayTime.replace('mins', 'min');
+              }
 
               return `
                 <div class="dep-row">
