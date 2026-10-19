@@ -64,7 +64,6 @@
     .header h1 span { color: var(--accent); }
     .header p { color: var(--text-muted); margin-top: 0.25rem; }
 
-    /* Map Card Container */
     .map-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
@@ -75,6 +74,7 @@
       flex-direction: column;
       flex-grow: 1;
       min-height: 550px;
+      position: relative;
     }
 
     #map {
@@ -83,6 +83,21 @@
       flex-grow: 1;
       border-radius: 8px;
       background-color: #0b1329;
+    }
+
+    #loading-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: opacity 0.5s;
     }
 
     /* CSS Dark Mode Filter for OpenStreetMap Tiles */
@@ -116,6 +131,7 @@
     </div>
 
     <div class="map-card">
+      <div id="loading-overlay">Syncing live network stops & tracks...</div>
       <div id="map"></div>
     </div>
   </div>
@@ -124,87 +140,144 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
-    // Initialize map centered around Beeston/Nottingham area
+    // Initialize map centered around the NET network
     const map = L.map('map', {
       zoomControl: false
-    }).setView([52.938, -1.185], 13);
+    }).setView([52.955, -1.185], 12);
 
-    // Add custom zoom control to top-right
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Free OpenStreetMap tiles (dark-themed via CSS filter)
+    // Free API-less OpenStreetMap tiles (dark-themed via CSS filter)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
 
-    // Corrected NET Stations based on the official network map
-    const stations = [
+    // Full Schedule Mapping from the Network Map PDF
+    const lineMapping = {
       // Green Line North
-      { name: "Hucknall", coords: [53.0335, -1.2045], line: "Green Line (Terminus)" },
+      "Hucknall": "Green Line",
+      "Butler's Hill": "Green Line",
+      "Moor Bridge": "Green Line",
+      "Bulwell Forest": "Green Line",
+      "Bulwell": "Green Line",
       
       // Purple Line North
-      { name: "Phoenix Park", coords: [53.0031, -1.2185], line: "Purple Line (Terminus)" },
+      "Phoenix Park": "Purple Line",
+      "Cinderhill": "Purple Line",
       
-      // Shared Central Section (Highbury Vale to Nottingham Station)
-      { name: "Highbury Vale", coords: [52.9904, -1.1866], line: "Green & Purple Lines (Junction)" },
-      { name: "The Forest", coords: [52.9645, -1.1532], line: "Green & Purple Lines" },
-      { name: "Royal Centre", coords: [52.9565, -1.1505], line: "Green & Purple Lines" },
-      { name: "Old Market Square", coords: [52.9548, -1.1481], line: "Green & Purple Lines" },
-      { name: "Lace Market", coords: [52.9521, -1.1432], line: "Green & Purple Lines" },
-      { name: "Nottingham Station", coords: [52.9443, -1.1478], line: "Green & Purple Lines (Interchange)" },
-      { name: "Meadows Way West", coords: [52.9404, -1.1492], line: "Green Line (Junction)" },
+      // Shared Central Section
+      "Highbury Vale": "Green & Purple Lines",
+      "David Lane": "Green & Purple Lines",
+      "Basford": "Green & Purple Lines",
+      "Wilkinson Street": "Green & Purple Lines",
+      "Radford Road": "Green & Purple Lines",
+      "Hyson Green Market": "Green & Purple Lines",
+      "Shipstone Street": "Green & Purple Lines",
+      "Beaconsfield Street": "Green & Purple Lines",
+      "Noel Street": "Green & Purple Lines",
+      "The Forest": "Green & Purple Lines",
+      "High School": "Green & Purple Lines",
+      "Nottingham Trent University": "Green & Purple Lines",
+      "Royal Centre": "Green & Purple Lines",
+      "Old Market Square": "Green & Purple Lines",
+      "Lace Market": "Green & Purple Lines",
+      "Nottingham Station": "Green & Purple Lines",
+      
+      // Green Line South
+      "Meadows Way West": "Green Line",
+      "NG2": "Green Line",
+      "Gregory Street": "Green Line",
+      "Queens Medical Centre": "Green Line",
+      "University of Nottingham": "Green Line",
+      "University Boulevard": "Green Line",
+      "Middle Street": "Green Line",
+      "Beeston Centre": "Green Line",
+      "Chilwell Road": "Green Line",
+      "High Road - Central College": "Green Line",
+      "Cator Lane": "Green Line",
+      "Bramcote Lane": "Green Line",
+      "Eskdale Drive": "Green Line",
+      "Inham Road": "Green Line",
+      "Toton Lane": "Green Line",
+      
+      // Purple Line South
+      "Queens Walk": "Purple Line",
+      "Meadows Embankment": "Purple Line",
+      "Wilford Village": "Purple Line",
+      "Wilford Lane": "Purple Line",
+      "Compton Acres": "Purple Line",
+      "Ruddington Lane": "Purple Line",
+      "Southchurch Drive": "Purple Line",
+      "Rivergreen": "Purple Line",
+      "Clifton Centre": "Purple Line",
+      "Holy Trinity": "Purple Line",
+      "Summerwood Lane": "Purple Line",
+      "Clifton South": "Purple Line"
+    };
 
-      // Green Line South (via Beeston)
-      { name: "Queens Medical Centre", coords: [52.9427, -1.1833], line: "Green Line" },
-      { name: "University of Nottingham", coords: [52.9384, -1.1932], line: "Green Line" },
-      { name: "Beeston Centre", coords: [52.9248, -1.2173], line: "Green Line" },
-      { name: "Toton Lane", coords: [52.9192, -1.2427], line: "Green Line (Terminus)" },
-
-      // Purple Line South (via Clifton)
-      { name: "Wilford Lane", coords: [52.9298, -1.1420], line: "Purple Line" },
-      { name: "Clifton Centre", coords: [52.9031, -1.1785], line: "Purple Line" },
-      { name: "Clifton South", coords: [52.8931, -1.1712], line: "Purple Line (Terminus)" }
-    ];
-
-    // Add markers with custom popup details
-    stations.forEach(station => {
-      let dotColor = "#38bdf8"; // Default blue
-      if (station.line.includes("Green")) dotColor = "#22c55e"; // Green Line marker
-      if (station.line.includes("Purple")) dotColor = "#a855f7"; // Purple Line marker
-      if (station.line.includes("Green & Purple")) dotColor = "#f8fafc"; // Shared line marker
-
-      const marker = L.circleMarker(station.coords, {
-        radius: 7,
-        fillColor: dotColor,
-        color: "#0f172a",
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      }).addTo(map);
-
-      marker.bindPopup(`
-        <div style="font-family: inherit;">
-          <strong style="font-size: 1.05rem; color: ${dotColor === '#f8fafc' ? '#38bdf8' : dotColor};">${station.name}</strong><br>
-          <span style="font-size: 0.85rem; color: #94a3b8;">${station.line}</span>
-        </div>
-      `);
-    });
-
-    // Fetch live route layout lines via Overpass API (OpenStreetMap Tram data)
-    async function loadTramTracks() {
+    // Fetch ALL route layout lines AND tram stops via Overpass API dynamically
+    async function loadTramNetwork() {
       try {
-        const query = `[out:json];relation["route"="tram"]["operator"="Nottingham Express Transit"];(._;>;);out body;`;
+        const query = `
+          [out:json];
+          (
+            relation["route"="tram"]["operator"="Nottingham Express Transit"];
+            node["railway"="tram_stop"](52.88,-1.26,53.04,-1.13);
+          );
+          out body;
+          >;
+          out skel qt;
+        `;
         const url = `https://overpass-api.de/api/interpreter?data=` + encodeURIComponent(query);
         
         const response = await fetch(url);
         const data = await response.json();
         
         const nodes = {};
+        
+        // Pass 1: Collect nodes and draw every station marker
         data.elements.forEach(el => {
-          if (el.type === 'node') nodes[el.id] = [el.lat, el.lon];
+          if (el.type === 'node') {
+            nodes[el.id] = [el.lat, el.lon]; // Save coordinates for track drawing
+            
+            // Plot Tram Stops
+            if (el.tags && el.tags.railway === 'tram_stop') {
+              let rawName = el.tags.name || "Unknown Stop";
+              
+              // Normalize names to match our schedule dictionary
+              let cleanName = rawName.replace(" Tram Stop", "").trim();
+              if (cleanName === "QMC") cleanName = "Queens Medical Centre";
+              if (cleanName.includes("High Road")) cleanName = "High Road - Central College";
+              
+              let lineStr = lineMapping[cleanName] || "NET Tram Stop";
+              
+              // Assign colors based on schedule
+              let dotColor = "#38bdf8"; 
+              if (lineStr.includes("Green")) dotColor = "#22c55e"; 
+              if (lineStr.includes("Purple")) dotColor = "#a855f7"; 
+              if (lineStr.includes("Green & Purple")) dotColor = "#f8fafc"; 
+              
+              const marker = L.circleMarker([el.lat, el.lon], {
+                radius: 6,
+                fillColor: dotColor,
+                color: "#0f172a",
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 1
+              }).addTo(map);
+
+              marker.bindPopup(`
+                <div style="font-family: inherit;">
+                  <strong style="font-size: 1.05rem; color: ${dotColor === '#f8fafc' ? '#38bdf8' : dotColor};">${cleanName}</strong><br>
+                  <span style="font-size: 0.85rem; color: #94a3b8;">${lineStr}</span>
+                </div>
+              `);
+            }
+          }
         });
 
+        // Pass 2: Connect the nodes to draw the tracks
         data.elements.forEach(el => {
           if (el.type === 'way' && el.nodes) {
             const wayCoords = el.nodes.map(nodeId => nodes[nodeId]).filter(coord => coord !== undefined);
@@ -212,17 +285,23 @@
               L.polyline(wayCoords, {
                 color: '#38bdf8',
                 weight: 3,
-                opacity: 0.4
+                opacity: 0.35
               }).addTo(map);
             }
           }
         });
+
+        // Hide loading screen once network is plotted
+        document.getElementById('loading-overlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 500);
+
       } catch (err) {
-        console.log("Track overlay loaded via fallback static bounds.");
+        console.error("Failed to load OSM data:", err);
+        document.getElementById('loading-overlay').textContent = "Failed to sync network data.";
       }
     }
 
-    loadTramTracks();
+    loadTramNetwork();
   </script>
 
 </body>
