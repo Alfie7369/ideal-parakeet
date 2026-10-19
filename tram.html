@@ -6,7 +6,6 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <title>NET Tram Map | Hawkes House</title>
   
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <style>
@@ -102,12 +101,10 @@
       transition: opacity 0.5s;
     }
 
-    /* CSS Dark Mode Filter for OpenStreetMap Tiles */
     .leaflet-tile {
       filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
     }
 
-    /* Custom Popup Theme Styling */
     .leaflet-popup-content-wrapper, .leaflet-popup-tip {
       background-color: var(--card-bg) !important;
       color: var(--text-main) !important;
@@ -124,7 +121,6 @@
       padding: 8px;
     }
     
-    /* Schedule Widget Styling */
     .schedule-header {
       padding: 12px 15px;
       border-bottom: 1px solid var(--border);
@@ -198,19 +194,14 @@
     </div>
 
     <div class="map-card">
-      <div id="loading-overlay">Syncing live network stops & tracks...</div>
+      <div id="loading-overlay">Syncing network stops & tracks...</div>
       <div id="map"></div>
     </div>
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
-    // TransportAPI Credentials
-    const APP_ID = '1ed6bf42';
-    const APP_KEY = 'a7ecd96d0b2585d4cac92e822712f0ae';
-
     const map = L.map('map', {
       zoomControl: false
     }).setView([52.955, -1.185], 12);
@@ -223,16 +214,13 @@
     }).addTo(map);
 
     const lineMapping = {
-      // Green Line North
       "Hucknall": "Green Line",
       "Butler's Hill": "Green Line",
       "Moor Bridge": "Green Line",
       "Bulwell Forest": "Green Line",
       "Bulwell": "Green Line",
-      // Purple Line North
       "Phoenix Park": "Purple Line",
       "Cinderhill": "Purple Line",
-      // Shared Central Section
       "Highbury Vale": "Green & Purple Lines",
       "David Lane": "Green & Purple Lines",
       "Basford": "Green & Purple Lines",
@@ -249,7 +237,6 @@
       "Old Market Square": "Green & Purple Lines",
       "Lace Market": "Green & Purple Lines",
       "Nottingham Station": "Green & Purple Lines",
-      // Green Line South
       "Meadows Way West": "Green Line",
       "NG2": "Green Line",
       "Gregory Street": "Green Line",
@@ -265,7 +252,6 @@
       "Eskdale Drive": "Green Line",
       "Inham Road": "Green Line",
       "Toton Lane": "Green Line",
-      // Purple Line South
       "Queens Walk": "Purple Line",
       "Meadows Embankment": "Purple Line",
       "Wilford Village": "Purple Line",
@@ -279,6 +265,81 @@
       "Summerwood Lane": "Purple Line",
       "Clifton South": "Purple Line"
     };
+
+    // Calculate the current active frequency based on the official NET Timetable
+    function getCurrentFrequency() {
+      const now = new Date();
+      const day = now.getDay();
+      const hour = now.getHours();
+
+      if (day === 0) { // Sunday
+        if (hour >= 6 && hour < 23) return 10;
+        return 15;
+      } else { // Monday-Saturday
+        if (hour >= 7 && hour < 19) return 7;
+        if (hour >= 19 && hour < 21) return 10;
+        return 15;
+      }
+    }
+
+    function generateHardcodedSchedule(displayTitle, lineStr, dotColor) {
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+      const frequency = getCurrentFrequency();
+      
+      // Calculate a pseudo-random offset based on station name to stagger times across the map
+      const stationOffset = displayTitle.length % frequency;
+      let departures = [];
+
+      function calculateWaitTimes(dest, color, offsetMod) {
+        // Calculate the next two departures
+        let wait1 = (frequency - ((currentMinute + stationOffset + offsetMod) % frequency));
+        let wait2 = wait1 + frequency;
+        
+        // Prevent showing 0 as 'Due' for the second tram
+        if (wait1 === frequency) wait1 = 0;
+        
+        departures.push({ dest: dest, time: wait1 === 0 ? "Due" : `${wait1} min`, val: wait1, color: color });
+        departures.push({ dest: dest, time: `${wait2} min`, val: wait2, color: color });
+      }
+
+      // Add appropriate departures based on the station's line
+      if (lineStr.includes("Green")) {
+        if (displayTitle !== "Hucknall") calculateWaitTimes("Hucknall", "var(--green-line)", 0);
+        if (displayTitle !== "Toton Lane") calculateWaitTimes("Toton Lane", "var(--green-line)", Math.floor(frequency / 2));
+      }
+      
+      if (lineStr.includes("Purple")) {
+        if (displayTitle !== "Phoenix Park") calculateWaitTimes("Phoenix Park", "var(--purple-line)", Math.floor(frequency / 3));
+        if (displayTitle !== "Clifton South") calculateWaitTimes("Clifton South", "var(--purple-line)", Math.floor(frequency / 1.5));
+      }
+
+      // Sort all calculated departures chronologically
+      departures.sort((a, b) => a.val - b.val);
+      
+      // Slice to show only the next 4 trams
+      const nextTrams = departures.slice(0, 4);
+
+      let rowsHTML = nextTrams.map(d => `
+        <div class="dep-row">
+          <div class="dep-dest" title="${d.dest}">
+            <div class="indicator" style="background-color: ${d.color};"></div>
+            ${d.dest}
+          </div>
+          <div class="dep-time ${d.time === 'Due' ? 'due' : ''}">${d.time}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
+          <p class="schedule-title">${displayTitle}</p>
+          <p class="schedule-subtitle">Scheduled Departures (Every ${frequency} mins)</p>
+        </div>
+        <div class="schedule-body">
+          ${rowsHTML}
+        </div>
+      `;
+    }
 
     async function loadTramNetwork() {
       try {
@@ -330,91 +391,7 @@
                 fillOpacity: 1
               }).addTo(map);
 
-              // Setup empty popup to be filled dynamically on click
-              marker.bindPopup(`<div style="padding: 20px; text-align: center; color: var(--text-muted);">Establishing secure link...</div>`);
-              
-              marker.on('popupopen', async (e) => {
-                const popup = e.popup;
-                try {
-                  // 1. Ask TransportAPI for the exact ATCO platform code at these GPS coordinates
-                  const placeRes = await fetch(`https://transportapi.com/v3/uk/places.json?lat=${el.lat}&lon=${el.lon}&type=tram_stop&app_id=${APP_ID}&app_key=${APP_KEY}`);
-                  const placeData = await placeRes.json();
-                  
-                  if (!placeData.member || placeData.member.length === 0) {
-                    popup.setContent(`<div style="padding: 20px; text-align: center; color: var(--text-muted);">No live telemetry available.</div>`);
-                    return;
-                  }
-                  
-                  const atcoCode = placeData.member[0].atcocode;
-                  
-                  // 2. Fetch live departures via the bus endpoint for trams
-                  const depRes = await fetch(`https://transportapi.com/v3/uk/bus/stop/${atcoCode}/live.json?app_id=${APP_ID}&app_key=${APP_KEY}&group=no`);
-                  const depData = await depRes.json();
-                  
-                  let departures = [];
-                  if (depData.departures && depData.departures.all) {
-                    departures = depData.departures.all.slice(0, 5); // Grab the next 5 trams
-                  }
-                  
-                  if (departures.length === 0) {
-                    popup.setContent(`
-                      <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
-                        <p class="schedule-title">${displayTitle}</p>
-                        <p class="schedule-subtitle">${lineStr}</p>
-                      </div>
-                      <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 20px;">
-                        No scheduled departures.
-                      </div>
-                    `);
-                    return;
-                  }
-                  
-                  // 3. Build the departure rows
-                  let rowsHTML = departures.map(d => {
-                    const dest = d.destination || d.direction || "Tram";
-                    const timeStr = d.expected_departure_time || d.aimed_departure_time || d.best_departure_estimate;
-                    
-                    let routeColor = "var(--accent)";
-                    if (dest.includes("Toton") || dest.includes("Hucknall")) routeColor = "var(--green-line)";
-                    if (dest.includes("Clifton") || dest.includes("Phoenix")) routeColor = "var(--purple-line)";
-                    
-                    // Calculate live minute countdown
-                    const now = new Date();
-                    const [hrs, mins] = timeStr.split(':');
-                    const depTime = new Date();
-                    depTime.setHours(parseInt(hrs), parseInt(mins), 0);
-                    
-                    let diffMins = Math.round((depTime - now) / 60000);
-                    if (diffMins < 0) diffMins += 1440; // Prevent negative wrap around midnight
-                    
-                    let displayTime = diffMins <= 1 ? "Due" : `${diffMins} min`;
-                    
-                    return `
-                      <div class="dep-row">
-                        <div class="dep-dest" title="${dest}">
-                          <div class="indicator" style="background-color: ${routeColor};"></div>
-                          ${dest}
-                        </div>
-                        <div class="dep-time ${displayTime === 'Due' ? 'due' : ''}">${displayTime}</div>
-                      </div>
-                    `;
-                  }).join('');
-                  
-                  popup.setContent(`
-                    <div class="schedule-header" style="border-top: 4px solid ${dotColor};">
-                      <p class="schedule-title">${displayTitle}</p>
-                      <p class="schedule-subtitle">Live Departures</p>
-                    </div>
-                    <div class="schedule-body">
-                      ${rowsHTML}
-                    </div>
-                  `);
-                  
-                } catch (err) {
-                  console.error("Live Schedule Error:", err);
-                  popup.setContent(`<div style="padding: 20px; text-align: center; color: var(--danger);">Failed to retrieve schedule.</div>`);
-                }
-              });
+              marker.bindPopup(generateHardcodedSchedule(displayTitle, lineStr, dotColor));
             }
           }
         });
