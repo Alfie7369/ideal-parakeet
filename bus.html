@@ -222,7 +222,6 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Stop coordinates meticulously aligned to sit precisely over the OSM map bus stop icons
     const busStops = [
       { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93292, lon: -1.19830, color: "var(--bus-orange)" },
       { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93262, lon: -1.19885, color: "var(--bus-orange)" },
@@ -246,26 +245,15 @@
         marker.on('popupopen', async (e) => {
           const popup = e.popup;
           try {
-            // Pure Serverless query direct to the official NCT ArcticAPI
             const res = await fetch(`https://nctx.arcticapi.com/network/stops/${stop.code}/visits`);
             if (!res.ok) throw new Error("API returned status: " + res.status);
             
             const data = await res.json();
             
-            // Robust extraction: Hunt for the live departure array regardless of how the payload nests it
+            // Extract the departures array from the _embedded object
             let departures = [];
-            if (Array.isArray(data)) {
-              departures = data;
-            } else if (data && typeof data === 'object') {
-              departures = data.visits || data.departures || data.calls || data.services || data.results || [];
-              if (departures.length === 0) {
-                for (const key in data) {
-                  if (Array.isArray(data[key])) {
-                    departures = data[key];
-                    break;
-                  }
-                }
-              }
+            if (data && data._embedded && Array.isArray(data._embedded.visits)) {
+              departures = data._embedded.visits;
             }
 
             if (departures.length === 0) {
@@ -275,37 +263,30 @@
                   <p class="schedule-subtitle">Live Departures</p>
                 </div>
                 <div class="schedule-body" style="text-align: center; color: var(--text-muted); padding-top: 15px;">
-                  No live departures returned by API.<br>
-                  <small style="opacity:0.4; font-size:0.75rem;">(API payload was empty)</small>
+                  No live departures returned by API.
                 </div>
               `);
               return;
             }
 
-            // Map the parsed JSON safely, unpacking nested objects
-            let rowsHTML = departures.slice(0, 6).map(d => {
-              const routeObj = d.line || d.route || {};
-              const destObj = d.destination || {};
+            let rowsHTML = departures.slice(0, 5).map(d => {
+              // Extract the nested line name from _links
+              let route = "Bus";
+              if (d._links && d._links["transmodel:line"] && d._links["transmodel:line"].name) {
+                route = d._links["transmodel:line"].name;
+              }
               
-              const route = d.lineName || d.publishedLineName || routeObj.publishedLineName || routeObj.name || d.routeNumber || "Bus";
-              const dest = d.destinationName || d.destinationDisplay || destObj.name || destObj.destinationDisplay || d.direction || "City Centre";
-              
-              const expectedTime = d.expectedDepartureTime || d.aimedDepartureTime || d.departureTime || d.time;
+              const dest = d.destinationName || "City Centre";
+              const expectedTime = d.expectedDepartureTime || d.aimedDepartureTime;
 
+              // Calculate minutes remaining
               let displayTime = "Due";
               if (expectedTime) {
-                // Safely handle both ISO Strings and UNIX Timestamps
-                let depTime;
-                if (typeof expectedTime === 'number') {
-                  depTime = new Date(expectedTime > 9999999999 ? expectedTime : expectedTime * 1000);
-                } else {
-                  depTime = new Date(expectedTime);
-                }
-                
+                const depTime = new Date(expectedTime);
                 const diffMins = Math.round((depTime - new Date()) / 60000);
                 displayTime = diffMins <= 1 ? "Due" : `${Math.max(0, diffMins)} min`;
-              } else if (d.expectedMins !== undefined) {
-                displayTime = d.expectedMins <= 1 ? "Due" : `${d.expectedMins} min`;
+              } else if (d.displayTime) {
+                displayTime = d.displayTime.replace('mins', 'min');
               }
 
               return `
