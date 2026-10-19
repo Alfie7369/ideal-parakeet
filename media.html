@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hawkes House | Media Catalog</title>
+  
+  <!-- PapaParse library to cleanly read the Google Sheet CSV format -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -127,87 +131,101 @@
       <a href="index.html" class="nav-link">← Back to Dashboard</a>
     </div>
     
-    <div id="loading-state">Loading catalog database...</div>
+    <div id="loading-state">Syncing live Google Sheet database...</div>
     <div id="album-grid" class="album-grid"></div>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const grid = document.getElementById("album-grid");
       const loadingState = document.getElementById("loading-state");
 
-      try {
-        // Fetch the JSON database
-        const response = await fetch('catalog.json');
-        if (!response.ok) throw new Error("Database not found");
-        const rawData = await response.json();
+      // The live export URL of your public Google Sheet
+      const sheetUrl = "https://docs.google.com/spreadsheets/d/1e1oM1jEF6Ke8lH_r_FjgORbyaIP5Q7Xaw4LDRjHlg4M/export?format=csv";
 
-        const albums = {};
-        let albumCounter = 0;
+      Papa.parse(sheetUrl, {
+        download: true,
+        header: false,
+        complete: function(results) {
+          const rawData = results.data;
+          const albums = {};
+          let albumCounter = 0;
 
-        // Parse the flat JSON into nested album objects
-        rawData.forEach(item => {
-          const albumKey = item.album + " | " + item.year;
-          
-          if (!albums[albumKey]) {
-            albums[albumKey] = {
-              id: albumCounter++,
-              mainArtist: item.artist, 
-              title: item.album,
-              year: item.year,
-              tracks: []
-            };
-          }
-          
-          let finalTrackName = item.track;
-          if (item.artist !== albums[albumKey].mainArtist) {
-            finalTrackName = item.track + ` <span style="font-size: 0.85em; opacity: 0.7;">— ${item.artist}</span>`;
-          }
-          
-          albums[albumKey].tracks.push(finalTrackName);
-        });
-
-        loadingState.style.display = 'none';
-        
-        // Render the Grid
-        Object.values(albums).forEach(album => {
-          const card = document.createElement("div");
-          card.className = "album-card";
-          
-          let trackItems = album.tracks.map(t => `<li>${t}</li>`).join("");
-          
-          card.innerHTML = `
-            <div class="album-header">
-              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><rect width='70' height='70' fill='%230f172a'/></svg>" class="album-cover" id="cover-${album.id}" alt="Cover">
-              <div class="album-info">
-                <h2 class="album-title" title="${album.title}">${album.title}</h2>
-                <p class="album-meta">${album.mainArtist} • ${album.year}</p>
-              </div>
-            </div>
-            <ol class="track-list">
-              ${trackItems}
-            </ol>
-          `;
-          grid.appendChild(card);
-          
-          fetchArtwork(album.mainArtist, album.title, album.id);
-        });
-
-        async function fetchArtwork(artist, title, id) {
-          try {
-            const query = encodeURIComponent(`${artist} ${title}`);
-            const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              document.getElementById(`cover-${id}`).src = data.results[0].artworkUrl100;
+          rawData.forEach(row => {
+            // Skip empty rows
+            if (row.length < 4 || !row[0]) return;
+            
+            const rowArtist = row[0].trim();
+            const albumTitle = row[1].trim();
+            const year = row[2].trim();
+            const trackTitle = row[3].trim();
+            
+            const albumKey = albumTitle + " | " + year;
+            
+            if (!albums[albumKey]) {
+              albums[albumKey] = {
+                id: albumCounter++,
+                mainArtist: rowArtist, 
+                title: albumTitle,
+                year: year,
+                tracks: []
+              };
             }
-          } catch (e) {
-            // Fails gracefully, leaves default dark square
-          }
+            
+            let finalTrackName = trackTitle;
+            // Append the track's artist if it differs from the main album artist
+            if (rowArtist !== albums[albumKey].mainArtist) {
+              finalTrackName = trackTitle + ` <span style="font-size: 0.85em; opacity: 0.7;">— ${rowArtist}</span>`;
+            }
+            
+            albums[albumKey].tracks.push(finalTrackName);
+          });
+
+          // Remove loading text
+          loadingState.style.display = 'none';
+          
+          // Render the Grid
+          Object.values(albums).forEach(album => {
+            const card = document.createElement("div");
+            card.className = "album-card";
+            
+            let trackItems = album.tracks.map(t => `<li>${t}</li>`).join("");
+            
+            card.innerHTML = `
+              <div class="album-header">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><rect width='70' height='70' fill='%230f172a'/></svg>" class="album-cover" id="cover-${album.id}" alt="Cover">
+                <div class="album-info">
+                  <h2 class="album-title" title="${album.title.replace(/"/g, '&quot;')}">${album.title}</h2>
+                  <p class="album-meta">${album.mainArtist} • ${album.year}</p>
+                </div>
+              </div>
+              <ol class="track-list">
+                ${trackItems}
+              </ol>
+            `;
+            grid.appendChild(card);
+            
+            fetchArtwork(album.mainArtist, album.title, album.id);
+          });
+        },
+        error: function(err) {
+          console.error("Database fetch error:", err);
+          loadingState.innerHTML = `<span style="color: #ef4444;">Failed to load live database. Ensure the Google Sheet is public.</span>`;
         }
-      } catch (error) {
-        console.error("Catalog fetch error:", error);
-        loadingState.innerHTML = `<span style="color: #ef4444;">Failed to load catalog database. Ensure catalog.json exists.</span>`;
+      });
+
+      // Fetches iTunes artwork dynamically
+      async function fetchArtwork(artist, title, id) {
+        try {
+          const query = encodeURIComponent(`${artist} ${title}`);
+          const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=album&limit=1`);
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            document.getElementById(`cover-${id}`).src = data.results[0].artworkUrl100;
+          }
+        } catch (e) {
+          // Fails gracefully, leaves default dark square
+        }
       }
     });
   </script>
