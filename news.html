@@ -160,8 +160,8 @@
       const feedContainer = document.getElementById('news-feed');
       
       try {
-        // corsproxy.io is much better at bypassing strict news site firewalls
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(rssUrl);
+        // Route the request through your private Cloudflare Worker
+        const proxyUrl = 'https://radio-proxy.alfie-hawkes2006.workers.dev/?url=' + encodeURIComponent(rssUrl);
         
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error("Proxy fetch failed with status: " + response.status);
