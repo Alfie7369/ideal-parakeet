@@ -221,12 +221,12 @@
       maxZoom: 19
     }).addTo(map);
 
-    // Official OpenStreetMap (OSM) native NaPTAN coordinates for flawless alignment
+    // Precisely aligned to Woodside Road bus stops and Milton Street
     const busStops = [
-      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.93305, lon: -1.19925, color: "var(--bus-orange)" },
-      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.93295, lon: -1.19940, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.95622, lon: -1.14827, color: "var(--bus-orange)" },
-      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.95587, lon: -1.14815, color: "var(--bus-orange)" }
+      { name: "Uni West Gate (UN24)", code: "3390UN24", lat: 52.9352, lon: -1.2065, color: "var(--bus-orange)" },
+      { name: "Uni West Gate (UN23)", code: "3390UN23", lat: 52.9350, lon: -1.2062, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J3)", code: "3390J3", lat: 52.9563, lon: -1.1483, color: "var(--bus-orange)" },
+      { name: "Victoria Centre (J4)", code: "3390J4", lat: 52.9560, lon: -1.1483, color: "var(--bus-orange)" }
     ];
 
     async function initBusMap() {
